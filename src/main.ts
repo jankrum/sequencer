@@ -1,4 +1,6 @@
+// Adds styles to the page
 import './style.css'
 
-import setlist from './sequencer/filesystem/setlist.ts'
-console.log(setlist)
+// The sequencer
+import { makeSequencer } from './sequencer/sequencer.ts'
+makeSequencer()

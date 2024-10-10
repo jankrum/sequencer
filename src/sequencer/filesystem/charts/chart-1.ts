@@ -1,4 +1,4 @@
-import { Chart, ScoreEventType } from '../types.ts'
+import Chart, { ScoreEventType } from '../../../types/chart.ts'
 import dummyScript from '../scripts/dummy.ts'
 
 const chart: Chart = {
