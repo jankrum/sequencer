@@ -1,67 +1,48 @@
-import Chart, { ScoreEventType } from '../../../types/chart.ts'
-import dummyScript from '../scripts/dummy.ts'
+import Chart, { BufferEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent } from '../../../types/types.ts'
+
+const majorScale = [0, 2, 4, 5, 7, 9, 11, 12]
 
 const chart: Chart = {
     title: "Lead Scale",
-    parts: {
-        lead: {
-            script: dummyScript,
-            score: [
-                {
-                    position: -Infinity,
-                    type: ScoreEventType.Tempo,
-                    bpm: 60
-                },
-                {
-                    position: 0,
-                    type: ScoreEventType.Note,
-                    pitch: 60,
-                    duration: 1
-                },
-                {
-                    position: 1,
-                    type: ScoreEventType.Note,
-                    pitch: 62,
-                    duration: 1
-                },
-                {
-                    position: 2,
-                    type: ScoreEventType.Note,
-                    pitch: 64,
-                    duration: 1
-                },
-                {
-                    position: 3,
-                    type: ScoreEventType.Note,
-                    pitch: 65,
-                    duration: 1
-                },
-                {
-                    position: 4,
-                    type: ScoreEventType.Note,
-                    pitch: 67,
-                    duration: 1
-                },
-                {
-                    position: 5,
-                    type: ScoreEventType.Note,
-                    pitch: 69,
-                    duration: 1
-                },
-                {
-                    position: 6,
-                    type: ScoreEventType.Note,
-                    pitch: 71,
-                    duration: 1
-                },
-                {
-                    position: 7,
-                    type: ScoreEventType.Note,
-                    pitch: 72,
-                    duration: 1
-                },
-            ],
-        },
+    compose: (bass, drum, chord, lead): BufferEvent[] => {
+        return [
+            {
+                position: -Infinity,
+                type: BufferEventType.Tempo,
+                bpm: 120
+            },
+            {
+                position: -Infinity,
+                part: bass,
+                type: BufferEventType.Finish,
+            },
+            {
+                position: -Infinity,
+                part: drum,
+                type: BufferEventType.Finish,
+            },
+            {
+                position: -Infinity,
+                part: chord,
+                type: BufferEventType.Finish,
+            },
+            ...majorScale.map((pitch: number, index: number): [BufferNoteOnEvent, BufferNoteOffEvent] => ([{
+                position: index,
+                part: lead,
+                type: BufferEventType.NoteOn,
+                pitch: pitch
+            }, {
+                position: index + 0.9,
+                part: lead,
+                type: BufferEventType.NoteOff,
+                pitch: pitch
+            }])).flat(),
+            {
+                position: majorScale.length,
+                type: BufferEventType.Finish,
+                part: lead
+            },
+        ]
     },
 }
 

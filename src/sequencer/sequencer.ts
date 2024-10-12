@@ -1,7 +1,8 @@
 // Imports
 import dm from '../dm.ts'
-import Chart from '../types/chart.ts'
+import Chart from '../types/types.ts'
 import setlist from './filesystem/setlist.ts'
+import Band from './band.ts'
 
 // Enums used in multiple classes
 const enum PlaybackState {
@@ -138,12 +139,14 @@ class Paginator {
 //#endregion
 
 //#region Playbacker
-class Playbacker {
+export class Playbacker {
     #playbackState = PlaybackState.Paused
     #subscription: (playbackAction: PlaybackAction) => void = () => { }
+    #band = new Band(this)
 
     changeChart(chart: Chart): void {
         console.log('changeChart', chart)
+        this.#band.changeChart(chart)
         if (this.#playbackState != PlaybackState.Stopped) {
             this.stop()
         }
@@ -155,13 +158,13 @@ class Playbacker {
                 console.log('already playing')
                 break
             case PlaybackState.Paused:
-                this.#subscription(PlaybackAction.Resume)
                 console.log('resume')
+                this.#subscription(PlaybackAction.Resume)
                 this.#playbackState = PlaybackState.Playing
                 break
             case PlaybackState.Stopped:
-                this.#subscription(PlaybackAction.Play)
                 console.log('play')
+                this.#subscription(PlaybackAction.Play)
                 this.#playbackState = PlaybackState.Playing
                 break
         }
@@ -170,8 +173,8 @@ class Playbacker {
     pause(): void {
         switch (this.#playbackState) {
             case PlaybackState.Playing:
-                this.#subscription(PlaybackAction.Pause)
                 console.log('pause')
+                this.#subscription(PlaybackAction.Pause)
                 this.#playbackState = PlaybackState.Paused
                 break
             case PlaybackState.Paused:
@@ -186,13 +189,13 @@ class Playbacker {
     stop(): void {
         switch (this.#playbackState) {
             case PlaybackState.Playing:
-                this.#subscription(PlaybackAction.Stop)
                 console.log('stop')
+                this.#subscription(PlaybackAction.Stop)
                 this.#playbackState = PlaybackState.Stopped
                 break
             case PlaybackState.Paused:
-                this.#subscription(PlaybackAction.Stop)
                 console.log('stop')
+                this.#subscription(PlaybackAction.Stop)
                 this.#playbackState = PlaybackState.Stopped
                 break
             case PlaybackState.Stopped:
@@ -205,15 +208,19 @@ class Playbacker {
         this.#subscription = (playbackAction: PlaybackAction) => {
             switch (playbackAction) {
                 case PlaybackAction.Play:
+                    this.#band.play()
                     transporter.changePlayback(PlaybackState.Playing)
                     break
                 case PlaybackAction.Pause:
+                    this.#band.pause()
                     transporter.changePlayback(PlaybackState.Paused)
                     break
                 case PlaybackAction.Resume:
+                    this.#band.resume()
                     transporter.changePlayback(PlaybackState.Playing)
                     break
                 case PlaybackAction.Stop:
+                    this.#band.stop()
                     transporter.changePlayback(PlaybackState.Stopped)
                     break
             }

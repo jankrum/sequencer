@@ -1,4 +1,4 @@
-import { ScriptFunction, Controller, ScoreEvent, ScoreEventType, ScoreTempoEvent, ScoreNoteEvent, BufferTempoEvent, BufferNoteOnEvent, BufferNoteOffEvent, BufferEvent, BufferEventType } from '../../../types/chart.ts'
+import { ScriptFunction, Controller, ScoreEvent, ScoreEventType, ScoreTempoEvent, ScoreNoteEvent, BufferTempoEvent, BufferNoteOnEvent, BufferNoteOffEvent, BufferEvent, BufferEventType } from '../../../types/types.ts'
 
 const script: ScriptFunction = (_controller: Controller, score: ScoreEvent[]): BufferEvent[] => {
     const eventBuffer: BufferEvent[] = []
