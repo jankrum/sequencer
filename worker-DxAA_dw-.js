@@ -1,0 +1,1 @@
+(function(){"use strict";var a=(t=>(t[t.Start=0]="Start",t[t.Stop=1]="Stop",t[t.Tick=2]="Tick",t))(a||{});const l=25;let i;self.onmessage=t=>{t.data===a.Start?(i&&clearInterval(i),i=setInterval(()=>postMessage(a.Tick),l)):t.data===a.Stop&&clearInterval(i)}})();
