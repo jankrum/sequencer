@@ -1,6 +1,6 @@
 // Imports
 import dm from '../dm.ts'
-import Chart from '../types/types.ts'
+import Chart from '../types.ts'
 import setlist from './filesystem/setlist.ts'
 import Band from './band.ts'
 

@@ -1,5 +1,5 @@
 import { Playbacker } from './sequencer.ts'
-import Chart, { PartName, BufferEvent, BufferEventType } from '../types/types.ts'
+import Chart, { PartName, BufferEvent, BufferEventType } from '../types.ts'
 
 //#region makeWorker
 export const enum WorkerMessageType {
@@ -38,7 +38,7 @@ class Synthesizer {
     }
 }
 
-class Part {
+export class Part {
     synthesizer: Synthesizer
 
     constructor(name: PartName) {
@@ -67,7 +67,7 @@ export default class Band {
     #startTime = 0
     #durationIntoSong = 0
     #millisecondsPerBeat = 60000 / 120
-    #partsThatAreFinished = new Set<PartName>()
+    #partsThatAreFinished = new Set<Part>()
 
     constructor(playbacker: Playbacker) {
         this.#playbacker = playbacker
@@ -119,11 +119,11 @@ export default class Band {
         return this.#buffer[0].position * this.#millisecondsPerBeat
     }
 
-    changeChart(chart: Chart) {
-        (this.#loadBuffer = () => this.#buffer = chart.compose(this.#parts.bass, this.#parts.drum, this.#parts.chord, this.#parts.lead))()
+    changeChart(chart: Chart): void {
+        (this.#loadBuffer = () => this.#buffer = chart.compose(this.#parts))()
     }
 
-    play() {
+    play(): void {
         this.#playing = true
 
         this.#startTime = window.performance.now() + 100
@@ -132,7 +132,7 @@ export default class Band {
         this.#worker.postMessage(WorkerMessageType.Start)
     }
 
-    pause() {
+    pause(): void {
         this.#playing = false
 
         this.#worker.postMessage(WorkerMessageType.Stop)
@@ -140,7 +140,7 @@ export default class Band {
         this.#durationIntoSong = window.performance.now() - this.#startTime
     }
 
-    resume() {
+    resume(): void {
         this.#playing = true
 
         this.#startTime = window.performance.now() - this.#durationIntoSong
@@ -148,7 +148,7 @@ export default class Band {
         this.#worker.postMessage(WorkerMessageType.Start)
     }
 
-    stop() {
+    stop(): void {
         this.#playing = false
 
         this.#worker.postMessage(WorkerMessageType.Stop)

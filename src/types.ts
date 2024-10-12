@@ -8,7 +8,13 @@
 //     makeOptionControl: (prefix: string, options: string[], suffix: string | null) => ControllerModule
 // }
 
+import { Part } from './sequencer/band.ts'
+
 export type PartName = 'bass' | 'drum' | 'chord' | 'lead'
+
+export type Parts = {
+    [key in PartName]: Part
+}
 
 export const enum BufferEventType {
     Tempo,
@@ -48,7 +54,7 @@ export type BufferEvent = BufferTempoEvent | BufferFinishEvent | BufferNoteOnEve
 
 type Chart = {
     title: string,
-    compose: (bass: any, drum: any, chord: any, lead: any) => BufferEvent[]
+    compose: (parts: Parts) => BufferEvent[]
 }
 
 export default Chart
