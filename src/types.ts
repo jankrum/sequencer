@@ -2,7 +2,6 @@ import Part from './sequencer/playbacker/band/part/part.ts'
 
 export type PartName = 'bass' | 'drum' | 'keys' | 'lead'
 
-//#region Config
 export type DuplexMidiConfig = {
     input: string,
     output: string,
@@ -13,6 +12,7 @@ export type SimplexMidiConfig = {
     channel: number,
 }
 
+//#region Controller Config
 export const enum ControllerType {
     Dom,
     Midi,
@@ -34,7 +34,9 @@ export type MidiControllerConfig = {
 // }
 
 export type ControllerConfig = DomControllerConfig | MidiControllerConfig // | WebrtcControllerConfig
+//#endregion
 
+//#region Synthesizer Config
 export const enum SynthesizerType {
     Dom,
     Midi,
@@ -77,7 +79,9 @@ export type MidiSynthesizerConfig = {
 // }
 
 export type SynthesizerConfig = DomSynthesizerConfig | MidiSynthesizerConfig // | ToneSynthesizerConfig
+//#endregion
 
+//#region Transporter Config
 export const enum TransporterType {
     Dom,
     Midi,
@@ -99,7 +103,9 @@ export type MidiTransporterConfig = {
 // }
 
 export type TransporterConfig = DomTransporterConfig | MidiTransporterConfig // | WebRTCTransporterConfig
+//#endregion
 
+//#region Config
 export type PartConfig = {
     controller: ControllerConfig,
     synthesizer: SynthesizerConfig,
@@ -171,8 +177,10 @@ export type BufferNoteOffEvent = {
 
 export type BufferEvent = BufferTempoEvent | BufferFinishEvent | BufferNoteOnEvent | BufferNoteOffEvent
 
+export type ComposeFunction = (parts: Parts) => BufferEvent[]
+
 export type Chart = {
     title: string,
-    compose: (parts: Parts) => BufferEvent[]
+    compose: ComposeFunction,
 }
 //#endregion
