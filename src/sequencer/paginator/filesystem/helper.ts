@@ -1,5 +1,5 @@
-import { BufferTempoEvent, BufferFinishEvent, BufferEventType } from '../../types.ts'
-import { Part } from '../band.ts'
+import { BufferTempoEvent, BufferFinishEvent, BufferEventType } from '../../../types.ts'
+import Part from '../../playbacker/band/part/part.ts'
 
 export function setInitialTempo(bpm: number): BufferTempoEvent {
     return {

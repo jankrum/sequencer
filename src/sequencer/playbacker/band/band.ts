@@ -1,5 +1,8 @@
-import { Playbacker } from './sequencer.ts'
-import Chart, { PartName, BufferEvent, BufferEventType } from '../types.ts'
+import Playbacker from '../../playbacker/playbacker.ts'
+import { Chart, BufferEvent, BufferEventType } from '../../../types.ts'
+import Part, { makeParts } from './part/part.ts'
+
+const windowLength = 100
 
 //#region makeWorker
 export const enum WorkerMessageType {
@@ -12,47 +15,6 @@ export const workerTickRate = 25
 
 function makeWorker(): Worker {
     return new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
-}
-//#endregion
-
-//#region makeParts
-// class Controller { }
-
-class Synthesizer {
-    #name: PartName
-
-    constructor(name: PartName) {
-        this.#name = name
-    }
-
-    noteOn(pitch: number, time: number) {
-        console.log('noteOn', this.#name, pitch, time)
-    }
-
-    noteOff(pitch: number, time: number) {
-        console.log('noteOff', this.#name, pitch, time)
-    }
-
-    allNotesOff() {
-        console.log('allNotesOff', this.#name)
-    }
-}
-
-export class Part {
-    synthesizer: Synthesizer
-
-    constructor(name: PartName) {
-        this.synthesizer = new Synthesizer(name)
-    }
-}
-
-function makeParts() {
-    return {
-        bass: new Part('bass'),
-        drum: new Part('drum'),
-        chord: new Part('chord'),
-        lead: new Part('lead'),
-    }
 }
 //#endregion
 
@@ -72,17 +34,11 @@ export default class Band {
     constructor(playbacker: Playbacker) {
         this.#playbacker = playbacker
 
-        this.#worker.onmessage = (e: { data: WorkerMessageType }) => {
-            if (this.#playing) {
-                if (e.data === WorkerMessageType.Tick) {
-                    this.schedule()
-                }
-            }
-        }
+        this.#worker.onmessage = (_) => this.schedule()
     }
 
     schedule() {
-        const endOfWindow = (window.performance.now() - this.#startTime) + 100
+        const endOfWindow = (window.performance.now() - this.#startTime) + windowLength
 
         while (this.#playing && this.#nextEventTime < endOfWindow) {
             const event = this.#buffer.shift()
@@ -126,7 +82,7 @@ export default class Band {
     play(): void {
         this.#playing = true
 
-        this.#startTime = window.performance.now() + 100
+        this.#startTime = window.performance.now() + windowLength
         this.#durationIntoSong = 0
 
         this.#worker.postMessage(WorkerMessageType.Start)
@@ -157,9 +113,13 @@ export default class Band {
         this.#partsThatAreFinished.clear()
         this.#loadBuffer()
 
-        for (const part of Object.values(this.#parts)) {
-            part.synthesizer.allNotesOff()
+        const allNotesOff = () => {
+            for (const part of Object.values(this.#parts)) {
+                part.synthesizer.allNotesOff()
+            }
         }
+
+        setTimeout(allNotesOff, windowLength)
     }
 }
 //#endregion

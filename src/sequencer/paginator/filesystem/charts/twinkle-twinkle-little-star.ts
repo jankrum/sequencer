@@ -1,10 +1,10 @@
-import Chart, { BufferEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent } from '../../../types.ts'
+import { Chart, BufferEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent } from '../../../../types.ts'
+import Part from '../../../playbacker/band/part/part.ts'
 import { setInitialTempo, sitOut } from '../helper.ts'
-import { Part } from '../../band.ts'
 
 const chart: Chart = {
     title: "Twinkle Twinkle Little Star",
-    compose: ({ bass, drum, chord, lead }): BufferEvent[] => {
+    compose: ({ bass, drum, keys, lead }): BufferEvent[] => {
         type Note = [pitch: number, duration: number, position: number]
 
         const songNotes: Note[] = (() => {
@@ -75,7 +75,7 @@ const chart: Chart = {
 
         const buffer: BufferEvent[] = [
             setInitialTempo(120),
-            ...sitOut(bass, drum, chord),
+            ...sitOut(bass, drum, keys),
             ...makeEventsFromSong(lead, songNotes),
         ]
 

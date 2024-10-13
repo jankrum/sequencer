@@ -1,5 +1,5 @@
-import Chart, { BufferEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent } from '../../../types.ts'
-import { Part } from '../../band.ts'
+import { Chart, BufferEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent } from '../../../../types.ts'
+import Part from '../../../playbacker/band/part/part.ts'
 import { setInitialTempo, sitOut } from '../helper.ts'
 
 const majorScale = [0, 2, 4, 5, 7, 9, 11, 12]
@@ -20,10 +20,10 @@ function makeMajorScaleWalk(part: Part): BufferEvent[] {
 
 const chart: Chart = {
     title: "Lead Scale",
-    compose: ({ bass, drum, chord, lead }): BufferEvent[] => {
+    compose: ({ bass, drum, keys, lead }): BufferEvent[] => {
         return [
             setInitialTempo(120),
-            ...sitOut(bass, drum, chord),
+            ...sitOut(bass, drum, keys),
             ...makeMajorScaleWalk(lead),
             {
                 position: majorScale.length,

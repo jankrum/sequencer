@@ -1,6 +1,7 @@
 // Adds styles to the page
 import './style.css'
 
-// The sequencer
+import getConfig from './get-config/get-config.ts'
 import { makeSequencer } from './sequencer/sequencer.ts'
-makeSequencer()
+
+getConfig().then(config => makeSequencer(config))
