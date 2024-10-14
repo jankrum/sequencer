@@ -16,11 +16,11 @@ function makeIntoDomTransporter(transporter: Transporter): void {
     // Used between the methods
     const chartTitleHeading = dm('h2')
     const buttons: { [key in TransporterButtonType]: HTMLButtonElement } = {
-        [TransporterButtonType.Previous]: dm('button', {}, '⏮') as HTMLButtonElement,
-        [TransporterButtonType.Play]: dm('button', {}, '▶') as HTMLButtonElement,
-        [TransporterButtonType.Pause]: dm('button', {}, '⏸') as HTMLButtonElement,
-        [TransporterButtonType.Stop]: dm('button', {}, '⏹') as HTMLButtonElement,
-        [TransporterButtonType.Next]: dm('button', {}, '⏭') as HTMLButtonElement,
+        [TransporterButtonType.Previous]: dm('button', { class: 'transporter-button' }, '⏮') as HTMLButtonElement,
+        [TransporterButtonType.Play]: dm('button', { class: 'transporter-button' }, '▶') as HTMLButtonElement,
+        [TransporterButtonType.Pause]: dm('button', { class: 'transporter-button' }, '⏸') as HTMLButtonElement,
+        [TransporterButtonType.Stop]: dm('button', { class: 'transporter-button' }, '⏹') as HTMLButtonElement,
+        [TransporterButtonType.Next]: dm('button', { class: 'transporter-button' }, '⏭') as HTMLButtonElement,
     }
 
     // Connect to what the transporter calls
@@ -49,7 +49,7 @@ function makeIntoDomTransporter(transporter: Transporter): void {
 
     // Render the transporter
     const buttonDiv = dm('div', {}, ...Object.values(buttons))
-    const div = dm('div', {}, chartTitleHeading, buttonDiv) as HTMLDivElement
+    const div = dm('div', { id: 'transporter' }, chartTitleHeading, buttonDiv) as HTMLDivElement
 
     transporter.render = (): HTMLDivElement | null => div
 }

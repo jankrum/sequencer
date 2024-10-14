@@ -75,8 +75,8 @@ class DomControllerModule {
     }
 
     render(): HTMLDivElement {
-        const label = dm('label', {}, ...Object.values(this.#spans)) as HTMLLabelElement
-        const div = dm('div', {}, label, this.#input) as HTMLDivElement
+        const label = dm('label', { class: 'lcd' }, ...Object.values(this.#spans)) as HTMLLabelElement
+        const div = dm('div', { class: 'controller-module' }, label, this.#input) as HTMLDivElement
         return div
     }
 }
@@ -119,8 +119,15 @@ function makeIntoDomController(controller: Controller): void {
     }
 
     controller.render = (): HTMLDivElement => {
+        const title = dm('h2', {}, 'Controller') as HTMLHeadingElement
         const controllerDivs = controllers.map(controller => controller.render())
-        return dm('div', {}, ...controllerDivs) as HTMLDivElement
+        const controllerRow = dm('div', { class: 'controller-row' }, ...controllerDivs) as HTMLDivElement
+
+        title.addEventListener('click', () => {
+            controllerRow.classList.toggle('hidden')
+        })
+
+        return dm('div', { class: 'controller' }, title, controllerRow) as HTMLDivElement
     }
 }
 

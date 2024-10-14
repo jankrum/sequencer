@@ -17,11 +17,11 @@ export default class Part {
     }
 
     render(): HTMLDivElement | null {
-        const partTitle = dm('h2', {}, this.#name) as HTMLHeadingElement
+        const partTitle = dm('h2', {}, this.#name.toUpperCase()) as HTMLHeadingElement
         const controllerDiv = this.controller.render()
         const synthesizerDiv = this.synthesizer.render()
 
-        return controllerDiv || synthesizerDiv ? dm('div', {}, partTitle, controllerDiv, synthesizerDiv) as HTMLDivElement : null
+        return controllerDiv || synthesizerDiv ? dm('div', { class: 'part' }, partTitle, controllerDiv, synthesizerDiv) as HTMLDivElement : null
     }
 }
 

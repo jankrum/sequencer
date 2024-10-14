@@ -126,7 +126,7 @@ export default class Band {
     render(): HTMLDivElement | null {
         const partDivs = Object.values(this.#parts).map(part => part.render())
 
-        return partDivs.some(div => div !== null) ? dm('div', {}, ...partDivs) as HTMLDivElement : null
+        return partDivs.some(div => div !== null) ? dm('div', { id: 'part-container' }, ...partDivs) as HTMLDivElement : null
     }
 }
 //#endregion
