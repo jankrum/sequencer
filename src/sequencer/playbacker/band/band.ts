@@ -39,7 +39,7 @@ export default class Band {
     }
 
     schedule() {
-        const endOfWindow = (window.performance.now() - this.#startTime) + windowLength
+        const endOfWindow = window.performance.now() + windowLength
 
         while (this.#playing && this.#nextEventTime < endOfWindow) {
             const event = this.#buffer.shift()
@@ -73,7 +73,7 @@ export default class Band {
             return Infinity
         }
 
-        return this.#buffer[0].position * this.#millisecondsPerBeat
+        return this.#buffer[0].position * this.#millisecondsPerBeat + this.#startTime
     }
 
     changeChart(chart: Chart): void {
