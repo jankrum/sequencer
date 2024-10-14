@@ -1,11 +1,10 @@
 // Imports
 import { Config } from '../types.ts'
-import Transporter from './transporter/transporter.ts'
+import Transporter from './transporter.ts'
 import Paginator from './paginator/paginator.ts'
 import Playbacker from './playbacker/playbacker.ts'
 import dm from '../dm.ts'
 
-//#region makeSequencer
 export function makeSequencer(config: Config): HTMLDivElement | null {
     // Create the transporter, paginator, and playbacker
     const transporter = new Transporter(config.transporter)
@@ -28,4 +27,3 @@ export function makeSequencer(config: Config): HTMLDivElement | null {
     // Return the sequencer div
     return div
 }
-//#endregion

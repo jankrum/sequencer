@@ -1,4 +1,4 @@
-import Transporter from '../transporter/transporter.ts'
+import Transporter from '../transporter.ts'
 import Playbacker from '../playbacker/playbacker.ts'
 
 import setlist from './filesystem/setlist.ts'

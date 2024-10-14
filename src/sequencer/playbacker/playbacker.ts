@@ -1,6 +1,6 @@
 import { PlaybackState, PlaybackAction, Chart, PartsConfig } from '../../types.ts'
 import Band from './band/band.ts'
-import Transporter from '../transporter/transporter.ts'
+import Transporter from '../transporter.ts'
 
 export default class Playbacker {
     #playbackState = PlaybackState.Paused

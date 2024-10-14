@@ -77,7 +77,14 @@ export default class Band {
     }
 
     changeChart(chart: Chart): void {
-        (this.#loadBuffer = () => this.#buffer = chart.compose(this.#parts))()
+        (this.#loadBuffer = () => {
+
+            for (const part of Object.values(this.#parts)) {
+                part.controller.clear()
+            }
+
+            this.#buffer = chart.compose(this.#parts)
+        })()
     }
 
     play(): void {
