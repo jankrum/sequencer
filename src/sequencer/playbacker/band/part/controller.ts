@@ -120,7 +120,7 @@ function makeIntoDomController(controller: Controller): void {
     }
 
     controller.render = (): HTMLDivElement => {
-        const title = dm('h2', {}, 'Controller') as HTMLHeadingElement
+        const title = dm('h2', { class: 'component-title'}, 'Controller') as HTMLHeadingElement
         const controllerDivs = controllers.map(controller => controller.render())
         const controllerRow = dm('div', { class: 'controller-row' }, ...controllerDivs) as HTMLDivElement
 

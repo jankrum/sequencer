@@ -19,7 +19,9 @@
 * {
   color: inherit;
   background-color: inherit;
+  border-color: inherit;
   font-family: inherit;
+  box-sizing: inherit;
 }
 
 body {
@@ -28,6 +30,9 @@ body {
   color: var(--text-color);
   background-color: var(--background-color);
   border-color: var(--text-color);
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 /* -------------------------------------------------------------------------- */
