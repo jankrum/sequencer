@@ -12,6 +12,30 @@ export type SimplexMidiConfig = {
     channel: number,
 }
 
+//#region Transporter Config
+export const enum TransporterType {
+    Dom,
+    Midi,
+    // WebRTC,
+}
+
+export type DomTransporterConfig = {
+    type: TransporterType.Dom,
+}
+
+export type MidiTransporterConfig = {
+    type: TransporterType.Midi,
+    midi: DuplexMidiConfig,
+}
+
+// export type WebRTCTransporterConfig = {
+//     type: TransporterType.WebRTC,
+//     room: string,
+// }
+
+export type TransporterConfig = DomTransporterConfig | MidiTransporterConfig // | WebRTCTransporterConfig
+//#endregion
+
 //#region Controller Config
 export const enum ControllerType {
     Dom,
@@ -81,30 +105,6 @@ export type MidiSynthesizerConfig = {
 export type SynthesizerConfig = DomSynthesizerConfig | MidiSynthesizerConfig // | ToneSynthesizerConfig
 //#endregion
 
-//#region Transporter Config
-export const enum TransporterType {
-    Dom,
-    Midi,
-    // WebRTC,
-}
-
-export type DomTransporterConfig = {
-    type: TransporterType.Dom,
-}
-
-export type MidiTransporterConfig = {
-    type: TransporterType.Midi,
-    midi: DuplexMidiConfig,
-}
-
-// export type WebRTCTransporterConfig = {
-//     type: TransporterType.WebRTC,
-//     room: string,
-// }
-
-export type TransporterConfig = DomTransporterConfig | MidiTransporterConfig // | WebRTCTransporterConfig
-//#endregion
-
 //#region Config
 export type PartConfig = {
     controller: ControllerConfig,
@@ -116,8 +116,8 @@ export type PartsConfig = {
 }
 
 export type Config = {
-    parts: PartsConfig,
     transporter: TransporterConfig,
+    parts: PartsConfig,
 }
 //#endregion
 

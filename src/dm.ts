@@ -1,4 +1,4 @@
-export default function dm(tag: string, attributes: object = {}, ...children: (string | HTMLElement)[]): any {
+export default function dm(tag: string, attributes: object = {}, ...children: (string | HTMLElement | null)[]): any {
     const element = document.createElement(tag)
 
     for (const [key, value] of Object.entries(attributes)) {
@@ -8,7 +8,7 @@ export default function dm(tag: string, attributes: object = {}, ...children: (s
     for (const child of children) {
         if (typeof child === 'string') {
             element.appendChild(document.createTextNode(child))
-        } else {
+        } else if (child) {
             element.appendChild(child)
         }
     }

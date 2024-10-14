@@ -1,11 +1,9 @@
-import { PlaybackState, TransporterConfig } from '../../types.ts'
+import { TransporterConfig, TransporterType, PlaybackState } from '../../types.ts'
 import dm from '../../dm.ts'
 import Paginator from '../paginator/paginator.ts'
 import Playbacker from '../playbacker/playbacker.ts'
 
-const transporterSelector = '#transporter'
-
-const enum TransporterButton {
+const enum TransporterButtonType {
     Previous = 'previous',
     Play = 'play',
     Pause = 'pause',
@@ -13,73 +11,98 @@ const enum TransporterButton {
     Next = 'next',
 }
 
-const buttonNamesAndSymbols: [TransporterButton, string][] = [
-    [TransporterButton.Previous, '⏮'],
-    [TransporterButton.Play, '▶'],
-    [TransporterButton.Pause, '⏸'],
-    [TransporterButton.Stop, '⏹'],
-    [TransporterButton.Next, '⏭'],
-]
+//#region DomTransporter
+function makeIntoDomTransporter(transporter: Transporter): void {
+    // Used between the methods
+    const chartTitleHeading = dm('h2')
+    const buttons: { [key in TransporterButtonType]: HTMLButtonElement } = {
+        [TransporterButtonType.Previous]: dm('button', {}, '⏮'),
+        [TransporterButtonType.Play]: dm('button', {}, '▶'),
+        [TransporterButtonType.Pause]: dm('button', {}, '⏸'),
+        [TransporterButtonType.Stop]: dm('button', {}, '⏹'),
+        [TransporterButtonType.Next]: dm('button', {}, '⏭'),
+    }
 
-const makeButton = ([name, symbol]: [TransporterButton, string]): [string, HTMLButtonElement] => [name, dm('button', {}, symbol)]
-const makeButtons = () => Object.fromEntries(buttonNamesAndSymbols.map(makeButton))
+    // Connect to what the transporter calls
+    transporter.connect = (paginator: Paginator, playbacker: Playbacker): void => {
+        buttons[TransporterButtonType.Previous].addEventListener('click', () => paginator.goPrevious())
+        buttons[TransporterButtonType.Next].addEventListener('click', () => paginator.goNext())
 
-const STATE_DICT = {
-    [PlaybackState.Playing]: {
-        play: true,
-        pause: false,
-        stop: false,
-    },
-    [PlaybackState.Paused]: {
-        play: false,
-        pause: true,
-        stop: false,
-    },
-    [PlaybackState.Stopped]: {
-        play: false,
-        pause: true,
-        stop: true,
-    },
+        buttons[TransporterButtonType.Play].addEventListener('click', () => playbacker.play())
+        buttons[TransporterButtonType.Pause].addEventListener('click', () => playbacker.pause())
+        buttons[TransporterButtonType.Stop].addEventListener('click', () => playbacker.stop())
+    }
+
+    // Change the chart title and button states
+    transporter.changeChart = (chartTitle: string, canPrevious: boolean, canNext: boolean): void => {
+        chartTitleHeading.innerText = chartTitle
+        buttons[TransporterButtonType.Previous].disabled = !canPrevious
+        buttons[TransporterButtonType.Next].disabled = !canNext
+    }
+
+    // Change the button states
+    transporter.changePlayback = (playbackState: PlaybackState): void => {
+        buttons[TransporterButtonType.Play].disabled = playbackState === PlaybackState.Playing
+        buttons[TransporterButtonType.Pause].disabled = playbackState !== PlaybackState.Playing
+        buttons[TransporterButtonType.Stop].disabled = playbackState === PlaybackState.Stopped
+    }
+
+    // Render the transporter
+    const buttonDiv = dm('div', {}, ...Object.values(buttons))
+    const div = dm('div', {}, chartTitleHeading, buttonDiv)
+
+    transporter.render = (): HTMLDivElement | null => div
 }
+//#endregion
 
+//#region MidiTransporter
+// function makeIntoMidiTransporter(transporter: Transporter, config: TransporterConfig): void {
+//     transporter.connect = (paginator: Paginator, playbacker: Playbacker): void => { }
+
+//     transporter.changeChart = (chartTitle: string, canPrevious: boolean, canNext: boolean): void => { }
+
+//     transporter.changePlayback = (playbackState: PlaybackState): void => { }
+
+//     transporter.render = (): HTMLDivElement | null => { return null }
+// }
+//#endregion
+
+//#region WebrtcTransporter
+// function makeWebrtcTransporter(transporter: Transporter, config: TransporterConfig): void {
+//     transporter.connect = (paginator: Paginator, playbacker: Playbacker): void => { }
+
+//     transporter.changeChart = (chartTitle: string, canPrevious: boolean, canNext: boolean): void => { }
+
+//     transporter.changePlayback = (playbackState: PlaybackState): void => { }
+
+//     transporter.render = (): HTMLDivElement | null => { return null }
+// }
+//#endregion
+
+//#region Transporter
 export default class Transporter {
-    #chartTitleHeading = dm('h2')
-    #buttons = makeButtons()
-
     constructor(config: TransporterConfig) {
-        console.debug('Transporter', config)
-
-        const transporterDiv = document.querySelector(transporterSelector)
-
-        if (!transporterDiv) {
-            throw new Error(`Transporter not found: ${transporterSelector}`)
-        }
-
-        const buttonDiv = dm('div', {}, ...Object.values(this.#buttons))
-
-        transporterDiv?.append(this.#chartTitleHeading, buttonDiv)
-    }
-
-    changeChart(chartTitle: string, canPrevious: boolean, canNext: boolean): void {
-        this.#chartTitleHeading.innerText = chartTitle
-        this.#buttons.previous.disabled = !canPrevious
-        this.#buttons.next.disabled = !canNext
-    }
-
-    changePlayback(playbackState: PlaybackState): void {
-        for (const [buttonName, isDisabled] of Object.entries(STATE_DICT[playbackState])) {
-            this.#buttons[buttonName].disabled = isDisabled
+        switch (config.type) {
+            case TransporterType.Dom:
+                makeIntoDomTransporter(this)
+                break
+            // case TransporterType.Midi:
+            //     makeIntoMidiTransporter(this, config)
+            //     break
+            // case TransporterType.WebRTC:
+            //     makeWebrtcTransporter(this, config)
+            //     break
+            default:
+                throw new Error(`Invalid TransporterType: ${config}`)
         }
     }
 
-    connect(paginator: Paginator, playbacker: Playbacker): void {
-        // To the paginator
-        this.#buttons[TransporterButton.Previous].addEventListener('click', () => paginator.goPrevious())
-        this.#buttons[TransporterButton.Next].addEventListener('click', () => paginator.goNext())
+    connect(_paginator: Paginator, _playbacker: Playbacker): void { }
 
-        // To the playbacker
-        this.#buttons[TransporterButton.Play].addEventListener('click', () => playbacker.play())
-        this.#buttons[TransporterButton.Pause].addEventListener('click', () => playbacker.pause())
-        this.#buttons[TransporterButton.Stop].addEventListener('click', () => playbacker.stop())
-    }
+    changeChart(_chartTitle: string, _canPrevious: boolean, _canNext: boolean): void { }
+
+    changePlayback(_playbackState: PlaybackState): void { }
+
+    render(): HTMLDivElement | null { return null }
 }
+//#endregion
