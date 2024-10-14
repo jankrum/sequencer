@@ -7,7 +7,7 @@ export default async (): Promise<Config> => ({
                 type: ControllerType.Dom
             },
             synthesizer: {
-                type: SynthesizerType.Dom
+                type: SynthesizerType.Log
             },
         },
         drum: {
@@ -15,7 +15,7 @@ export default async (): Promise<Config> => ({
                 type: ControllerType.Dom
             },
             synthesizer: {
-                type: SynthesizerType.Dom
+                type: SynthesizerType.Log
             },
         },
         keys: {
@@ -23,7 +23,7 @@ export default async (): Promise<Config> => ({
                 type: ControllerType.Dom
             },
             synthesizer: {
-                type: SynthesizerType.Dom
+                type: SynthesizerType.Log
             },
         },
         lead: {
@@ -31,7 +31,7 @@ export default async (): Promise<Config> => ({
                 type: ControllerType.Dom
             },
             synthesizer: {
-                type: SynthesizerType.Dom
+                type: SynthesizerType.Log
             },
         },
     },

@@ -1,6 +1,7 @@
 import Playbacker from '../../playbacker/playbacker.ts'
-import { Chart, BufferEvent, BufferEventType } from '../../../types.ts'
+import { PartsConfig, Chart, BufferEvent, BufferEventType } from '../../../types.ts'
 import Part, { makeParts } from './part/part.ts'
+import dm from '../../../dm.ts'
 
 const windowLength = 100
 
@@ -22,7 +23,7 @@ function makeWorker(): Worker {
 export default class Band {
     #playbacker: Playbacker
     #worker = makeWorker()
-    #parts = makeParts()
+    #parts
     #playing = false
     #buffer: BufferEvent[] = []
     #loadBuffer: () => void = () => { }
@@ -31,9 +32,9 @@ export default class Band {
     #millisecondsPerBeat = 60000 / 120
     #partsThatAreFinished = new Set<Part>()
 
-    constructor(playbacker: Playbacker) {
+    constructor(playbacker: Playbacker, config: PartsConfig) {
         this.#playbacker = playbacker
-
+        this.#parts = makeParts(config)
         this.#worker.onmessage = (_) => this.schedule()
     }
 
@@ -120,6 +121,12 @@ export default class Band {
         }
 
         setTimeout(allNotesOff, windowLength)
+    }
+
+    render(): HTMLDivElement | null {
+        const partDivs = Object.values(this.#parts).map(part => part.render())
+
+        return partDivs.some(div => div !== null) ? dm('div', {}, ...partDivs) as HTMLDivElement : null
     }
 }
 //#endregion

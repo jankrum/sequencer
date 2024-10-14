@@ -5,10 +5,11 @@ import Transporter from '../transporter/transporter.ts'
 export default class Playbacker {
     #playbackState = PlaybackState.Paused
     #subscription: (playbackAction: PlaybackAction) => void = () => { }
-    #band = new Band(this)
+    #band: Band
 
     constructor(config: PartsConfig) {
         console.debug('Playbacker', config)
+        this.#band = new Band(this, config)
     }
 
     changeChart(chart: Chart): void {
@@ -92,5 +93,9 @@ export default class Playbacker {
                     break
             }
         }
+    }
+
+    render(): HTMLDivElement | null {
+        return this.#band.render()
     }
 }

@@ -16,11 +16,11 @@ function makeIntoDomTransporter(transporter: Transporter): void {
     // Used between the methods
     const chartTitleHeading = dm('h2')
     const buttons: { [key in TransporterButtonType]: HTMLButtonElement } = {
-        [TransporterButtonType.Previous]: dm('button', {}, '⏮'),
-        [TransporterButtonType.Play]: dm('button', {}, '▶'),
-        [TransporterButtonType.Pause]: dm('button', {}, '⏸'),
-        [TransporterButtonType.Stop]: dm('button', {}, '⏹'),
-        [TransporterButtonType.Next]: dm('button', {}, '⏭'),
+        [TransporterButtonType.Previous]: dm('button', {}, '⏮') as HTMLButtonElement,
+        [TransporterButtonType.Play]: dm('button', {}, '▶') as HTMLButtonElement,
+        [TransporterButtonType.Pause]: dm('button', {}, '⏸') as HTMLButtonElement,
+        [TransporterButtonType.Stop]: dm('button', {}, '⏹') as HTMLButtonElement,
+        [TransporterButtonType.Next]: dm('button', {}, '⏭') as HTMLButtonElement,
     }
 
     // Connect to what the transporter calls
@@ -49,7 +49,7 @@ function makeIntoDomTransporter(transporter: Transporter): void {
 
     // Render the transporter
     const buttonDiv = dm('div', {}, ...Object.values(buttons))
-    const div = dm('div', {}, chartTitleHeading, buttonDiv)
+    const div = dm('div', {}, chartTitleHeading, buttonDiv) as HTMLDivElement
 
     transporter.render = (): HTMLDivElement | null => div
 }
@@ -93,7 +93,7 @@ export default class Transporter {
             //     makeWebrtcTransporter(this, config)
             //     break
             default:
-                throw new Error(`Invalid TransporterType: ${config}`)
+                throw new Error(`Invalid Transporter type: ${config}`)
         }
     }
 

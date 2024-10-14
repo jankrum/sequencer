@@ -19,8 +19,8 @@ export function makeSequencer(config: Config): HTMLDivElement | null {
 
     // Make the sequencer div
     const transporterDiv = transporter.render()
-    // const playbackerDiv = playbacker.render()
-    const div = (transporterDiv /*|| playbackerDiv*/) ? dm('div', {}, transporterDiv /*, playbackerDiv*/) : null
+    const playbackerDiv = playbacker.render()
+    const div = (transporterDiv || playbackerDiv) ? dm('div', {}, transporterDiv, playbackerDiv) as HTMLDivElement : null
 
     // Start everything
     paginator.start()

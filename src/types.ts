@@ -62,9 +62,14 @@ export type ControllerConfig = DomControllerConfig | MidiControllerConfig // | W
 
 //#region Synthesizer Config
 export const enum SynthesizerType {
+    Log,
     Dom,
     Midi,
     // Tone,
+}
+
+export type LogSynthesizerConfig = {
+    type: SynthesizerType.Log,
 }
 
 export type DomSynthesizerConfig = {
@@ -102,7 +107,7 @@ export type MidiSynthesizerConfig = {
 //     source: ToneSourceConfig,
 // }
 
-export type SynthesizerConfig = DomSynthesizerConfig | MidiSynthesizerConfig // | ToneSynthesizerConfig
+export type SynthesizerConfig = LogSynthesizerConfig | DomSynthesizerConfig | MidiSynthesizerConfig // | ToneSynthesizerConfig
 //#endregion
 
 //#region Config
