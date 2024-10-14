@@ -1,3 +1,4 @@
+import dm from '../../../../dm.ts'
 import { SynthesizerConfig, PartName, SynthesizerType } from '../../../../types.ts'
 
 //#region LogSynthesizer
@@ -17,13 +18,41 @@ function makeIntoLogSynthesizer(synthesizer: Synthesizer): void {
 //#endregion
 
 //#region DomSynthesizer
-// function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
-//     synthesizer.noteOn = (pitch: number, time: number): void => { }
+function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
+    const title = dm('h2', { class: 'component-title' }, 'Synthesizer') as HTMLHeadingElement
+    const clearButton = dm('button', { style: { class: 'clear-button' } }, 'Clear') as HTMLButtonElement
+    const messageRow = dm('div', { style: { class: 'message-row' } }) as HTMLDivElement
+    const synthesizerRow = dm('div', { style: { class: 'synthesizer-row' } }, clearButton, messageRow) as HTMLDivElement
+    const div = dm('div', { style: { class: 'synthesizer' } }, title, synthesizerRow) as HTMLDivElement
 
-//     synthesizer.noteOff = (pitch: number, time: number): void => { }
+    synthesizer.noteOn = (pitch: number, time: number): void => {
+        const message = dm('div', { class: 'note-on' }, `noteOn ${pitch} ${time}`) as HTMLDivElement
 
-//     synthesizer.allNotesOff = (): void => { }
-// }
+        messageRow.appendChild(message)
+    }
+
+    synthesizer.noteOff = (pitch: number, time: number): void => {
+        const message = dm('div', { class: 'note-off' }, `noteOff ${pitch} ${time}`) as HTMLDivElement
+
+        messageRow.appendChild(message)
+    }
+
+    synthesizer.allNotesOff = (): void => {
+        const message = dm('div', { class: 'all-notes-off' }, 'allNotesOff') as HTMLDivElement
+
+        messageRow.appendChild(message)
+    }
+
+    clearButton.addEventListener('click', () => {
+        messageRow.innerHTML = ''
+    })
+
+    title.addEventListener('click', () => {
+        synthesizerRow.classList.toggle('hidden')
+    })
+
+    synthesizer.render = (): HTMLDivElement => div
+}
 //#endregion
 
 //#region MidiSynthesizer
@@ -53,9 +82,9 @@ export default class Synthesizer {
             case SynthesizerType.Log:
                 makeIntoLogSynthesizer(this)
                 break
-            // case SynthesizerType.Dom:
-            //     makeIntoDomSynthesizer(this)
-            //     break
+            case SynthesizerType.Dom:
+                makeIntoDomSynthesizer(this)
+                break
             // case SynthesizerType.Midi:
             //     makeIntoMidiSynthesizer(this)
             //     break
