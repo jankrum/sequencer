@@ -48,7 +48,7 @@ function makeIntoLogSynthesizer(synthesizer: Synthesizer): void {
 
 //#region Synthesizer
 export default class Synthesizer {
-    constructor(name: PartName, config: SynthesizerConfig) {
+    constructor(_name: PartName, config: SynthesizerConfig) {
         switch (config.type) {
             case SynthesizerType.Log:
                 makeIntoLogSynthesizer(this)

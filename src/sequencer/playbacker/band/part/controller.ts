@@ -11,6 +11,7 @@ const rangeValues = {
 type RangeControl = { value: number }
 type OptionControl = { value: number }
 
+//#region DomController
 const enum SpanType {
     Prefix,
     Root,
@@ -130,11 +131,13 @@ function makeIntoDomController(controller: Controller): void {
         return dm('div', { class: 'controller' }, title, controllerRow) as HTMLDivElement
     }
 }
+//#endregion
 
-function makeIntoMidiController() { }
+// function makeIntoMidiController() { }
 
-function makeIntoWebrtcController() { }
+// function makeIntoWebrtcController() { }
 
+//#region Controller
 export default class Controller {
     constructor(_name: PartName, config: ControllerConfig) {
         switch (config.type) {
@@ -160,3 +163,4 @@ export default class Controller {
 
     render(): HTMLDivElement | null { return null }
 }
+//#endregion
