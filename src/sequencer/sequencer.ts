@@ -3,9 +3,12 @@ import { Config } from '../types.ts'
 import Transporter from './transporter.ts'
 import Paginator from './paginator/paginator.ts'
 import Playbacker from './playbacker/playbacker.ts'
-import dm from '../dm.ts'
 
-export function makeSequencer(config: Config): HTMLDivElement | null {
+function appendToBodyIfNotNull(div: HTMLDivElement | null): void {
+    if (div) { document.body.append(div) }
+}
+
+export function makeSequencer(config: Config): void {
     // Create the transporter, paginator, and playbacker
     const transporter = new Transporter(config.transporter)
     const paginator = new Paginator()
@@ -19,11 +22,11 @@ export function makeSequencer(config: Config): HTMLDivElement | null {
     // Make the sequencer div
     const transporterDiv = transporter.render()
     const playbackerDiv = playbacker.render()
-    const div = (transporterDiv || playbackerDiv) ? dm('div', {}, transporterDiv, playbackerDiv) as HTMLDivElement : null
+
+    // Append the transporter and playbacker to the body if they exist
+    appendToBodyIfNotNull(transporterDiv)
+    appendToBodyIfNotNull(playbackerDiv)
 
     // Start everything
     paginator.start()
-
-    // Return the sequencer div
-    return div
 }

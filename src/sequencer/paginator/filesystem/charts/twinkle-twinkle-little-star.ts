@@ -42,7 +42,7 @@ const chart: Chart = {
             const song: Note[] = []
 
             for (const note of sections) {
-                song.push([note[0], note[1], acc])
+                song.push([note[0] + 48, note[1], acc])
                 acc += note[1]
             }
 

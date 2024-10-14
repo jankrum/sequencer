@@ -1,5 +1,6 @@
 import dm from '../../../../dm.ts'
-import { SynthesizerConfig, PartName, SynthesizerType } from '../../../../types.ts'
+import { SynthesizerConfig, PartName, SynthesizerType, MidiSynthesizerConfig } from '../../../../types.ts'
+import midiAccess from '../../../../midi-access.ts'
 
 //#region LogSynthesizer
 function makeIntoLogSynthesizer(synthesizer: Synthesizer): void {
@@ -20,10 +21,10 @@ function makeIntoLogSynthesizer(synthesizer: Synthesizer): void {
 //#region DomSynthesizer
 function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
     const title = dm('h2', { class: 'component-title' }, 'Synthesizer') as HTMLHeadingElement
-    const clearButton = dm('button', { style: { class: 'clear-button' } }, 'Clear') as HTMLButtonElement
-    const messageRow = dm('div', { style: { class: 'message-row' } }) as HTMLDivElement
-    const synthesizerRow = dm('div', { style: { class: 'synthesizer-row' } }, clearButton, messageRow) as HTMLDivElement
-    const div = dm('div', { style: { class: 'synthesizer' } }, title, synthesizerRow) as HTMLDivElement
+    const clearButton = dm('button', {}, 'Clear') as HTMLButtonElement
+    const messageRow = dm('div', { class: 'message-row' }) as HTMLDivElement
+    const synthesizerRow = dm('div', { class: 'synthesizer-row' }, clearButton, messageRow) as HTMLDivElement
+    const div = dm('div', { class: 'synthesizer' }, title, synthesizerRow) as HTMLDivElement
 
     synthesizer.noteOn = (pitch: number, time: number): void => {
         const message = dm('div', { class: 'note-on' }, `noteOn ${pitch} ${time}`) as HTMLDivElement
@@ -56,13 +57,31 @@ function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
 //#endregion
 
 //#region MidiSynthesizer
-// function makeIntoMidiSynthesizer(synthesizer: Synthesizer): void {
-//     synthesizer.noteOn = (pitch: number, time: number): void => { }
+function makeIntoMidiSynthesizer(synthesizer: Synthesizer, config: MidiSynthesizerConfig): void {
+    if (!midiAccess) {
+        throw new Error('No MIDI access')
+    }
 
-//     synthesizer.noteOff = (pitch: number, time: number): void => { }
+    const output = midiAccess.outputs.values().find(output => output.name === config.midi.output)
 
-//     synthesizer.allNotesOff = (): void => { }
-// }
+    if (!output) {
+        throw new Error(`No MIDI output named ${config.midi.output}`)
+    }
+
+    const zeroIndexedChannel = config.midi.channel - 1
+
+    synthesizer.noteOn = (pitch: number, time: number): void => {
+        output.send([0x90 + zeroIndexedChannel, pitch, 0x7f], time)
+    }
+
+    synthesizer.noteOff = (pitch: number, time: number): void => {
+        output.send([0x80 + zeroIndexedChannel, pitch, 0x00], time)
+    }
+
+    synthesizer.allNotesOff = (): void => {
+        output.send([0xb0 + zeroIndexedChannel, 0x7b, 0x00])
+    }
+}
 //#endregion
 
 //#region ToneSynthesizer
@@ -85,14 +104,14 @@ export default class Synthesizer {
             case SynthesizerType.Dom:
                 makeIntoDomSynthesizer(this)
                 break
-            // case SynthesizerType.Midi:
-            //     makeIntoMidiSynthesizer(this)
-            //     break
+            case SynthesizerType.Midi:
+                makeIntoMidiSynthesizer(this, config as MidiSynthesizerConfig)
+                break
             // case SynthesizerType.Tone:
             //     makeIntoToneSynthesizer(this)
             //     break
-            default:
-                throw new Error(`Invalid synthesizer type: ${config.type}`)
+            // default:
+            //     throw new Error(`Invalid synthesizer type: ${config.type}`)
         }
     }
 

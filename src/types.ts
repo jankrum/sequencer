@@ -170,7 +170,6 @@ export type BufferNoteOnEvent = {
     part: Part
     type: BufferEventType.NoteOn
     pitch: number
-
 }
 
 export type BufferNoteOffEvent = {

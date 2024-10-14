@@ -1,6 +1,15 @@
-import { defineConfig } from "vite"
-import { viteSingleFile } from "vite-plugin-singlefile"
+import { defineConfig } from 'vite'
+import topLevelAwait from 'vite-plugin-top-level-await'
+import { viteSingleFile } from 'vite-plugin-singlefile'
 
 export default defineConfig({
-    plugins: [viteSingleFile()],
+    plugins: [
+        topLevelAwait({
+            // The export name of top-level await promise for each chunk module
+            promiseExportName: "__tla",
+            // The function to generate import names of top-level await promise in each chunk module
+            promiseImportName: i => `__tla_${i}`
+        }),
+        viteSingleFile(),
+    ],
 })

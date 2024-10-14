@@ -6,13 +6,13 @@ import dm from '../../../dm.ts'
 const windowLength = 100
 
 //#region makeWorker
-export const enum WorkerMessageType {
+export const enum WorkerMessageType {  // THIS ALSO HAS TO BE IN WORKER.TS
     Start,
     Stop,
     Tick,
 }
 
-export const workerTickRate = 25
+export const workerTickRate = 25  // THIS ALSO HAS TO BE IN WORKER.TS
 
 function makeWorker(): Worker {
     return new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
@@ -42,6 +42,7 @@ export default class Band {
         const endOfWindow = window.performance.now() + windowLength
 
         while (this.#playing && this.#nextEventTime < endOfWindow) {
+            const eventTime = this.#nextEventTime
             const event = this.#buffer.shift()
 
             if (event) {
@@ -57,10 +58,10 @@ export default class Band {
                         }
                         break
                     case BufferEventType.NoteOn:
-                        event.part.synthesizer.noteOn(event.pitch, this.#nextEventTime)
+                        event.part.synthesizer.noteOn(event.pitch, eventTime)
                         break
                     case BufferEventType.NoteOff:
-                        event.part.synthesizer.noteOff(event.pitch, this.#nextEventTime)
+                        event.part.synthesizer.noteOff(event.pitch, eventTime)
                         break
                 }
 
@@ -73,7 +74,7 @@ export default class Band {
             return Infinity
         }
 
-        return this.#buffer[0].position * this.#millisecondsPerBeat + this.#startTime
+        return (this.#buffer[0].position * this.#millisecondsPerBeat) + this.#startTime
     }
 
     changeChart(chart: Chart): void {
