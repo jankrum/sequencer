@@ -151,6 +151,7 @@ export const enum BufferEventType {
     Finish,
     NoteOn,
     NoteOff,
+    Compute,
 }
 
 export type BufferTempoEvent = {
@@ -170,6 +171,7 @@ export type BufferNoteOnEvent = {
     part: Part
     type: BufferEventType.NoteOn
     pitch: number
+    // velocity: number
 }
 
 export type BufferNoteOffEvent = {
@@ -179,12 +181,16 @@ export type BufferNoteOffEvent = {
     pitch: number
 }
 
-export type BufferEvent = BufferTempoEvent | BufferFinishEvent | BufferNoteOnEvent | BufferNoteOffEvent
+export type BufferComputeEvent = {
+    position: number
+    type: BufferEventType.Compute
+    callback: (buffer: BufferEvent[]) => void
+}
 
-export type ComposeFunction = (parts: Parts) => BufferEvent[]
+export type BufferEvent = BufferTempoEvent | BufferFinishEvent | BufferNoteOnEvent | BufferNoteOffEvent | BufferComputeEvent
 
 export type Chart = {
     title: string,
-    compose: ComposeFunction,
+    compose: (parts: Parts) => BufferEvent[],
 }
 //#endregion

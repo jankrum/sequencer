@@ -63,6 +63,9 @@ export default class Band {
                     case BufferEventType.NoteOff:
                         event.part.synthesizer.noteOff(event.pitch, eventTime)
                         break
+                    case BufferEventType.Compute:
+                        event.callback(this.#buffer)
+                        break
                 }
 
             }
@@ -103,6 +106,14 @@ export default class Band {
         this.#worker.postMessage(WorkerMessageType.Stop)
 
         this.#durationIntoSong = window.performance.now() - this.#startTime
+
+        const pauseAll = () => {
+            for (const part of Object.values(this.#parts)) {
+                part.synthesizer.pause()
+            }
+        }
+
+        setTimeout(pauseAll, windowLength * 2)
     }
 
     resume(): void {
@@ -111,6 +122,10 @@ export default class Band {
         this.#startTime = window.performance.now() - this.#durationIntoSong
 
         this.#worker.postMessage(WorkerMessageType.Start)
+
+        for (const part of Object.values(this.#parts)) {
+            part.synthesizer.resume()
+        }
     }
 
     stop(): void {
@@ -128,7 +143,7 @@ export default class Band {
             }
         }
 
-        setTimeout(allNotesOff, windowLength)
+        setTimeout(allNotesOff, windowLength * 2)
     }
 
     render(): HTMLDivElement | null {

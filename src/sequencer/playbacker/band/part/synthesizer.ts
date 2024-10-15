@@ -26,22 +26,32 @@ function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
     const synthesizerRow = dm('div', { class: 'synthesizer-row' }, clearButton, messageRow) as HTMLDivElement
     const div = dm('div', { class: 'synthesizer' }, title, synthesizerRow) as HTMLDivElement
 
-    synthesizer.noteOn = (pitch: number, time: number): void => {
+    synthesizer.noteOn = (pitch: number, time: number, addToCurrentlyPlaying: boolean = true): void => {
+        if (addToCurrentlyPlaying) {
+            synthesizer.currentlyPlayingPitches.push(pitch)
+        }
+
         const message = dm('div', { class: 'note-on' }, `noteOn ${pitch} ${time}`) as HTMLDivElement
 
         messageRow.appendChild(message)
     }
 
-    synthesizer.noteOff = (pitch: number, time: number): void => {
+    synthesizer.noteOff = (pitch: number, time: number, removeFromCurrentlyPlaying: boolean = true): void => {
         const message = dm('div', { class: 'note-off' }, `noteOff ${pitch} ${time}`) as HTMLDivElement
 
         messageRow.appendChild(message)
+
+        if (removeFromCurrentlyPlaying) {
+            synthesizer.currentlyPlayingPitches = synthesizer.currentlyPlayingPitches.filter(currentPitch => currentPitch !== pitch)
+        }
     }
 
     synthesizer.allNotesOff = (): void => {
         const message = dm('div', { class: 'all-notes-off' }, 'allNotesOff') as HTMLDivElement
 
         messageRow.appendChild(message)
+
+        synthesizer.currentlyPlayingPitches = []
     }
 
     clearButton.addEventListener('click', () => {
@@ -70,16 +80,26 @@ function makeIntoMidiSynthesizer(synthesizer: Synthesizer, config: MidiSynthesiz
 
     const zeroIndexedChannel = config.midi.channel - 1
 
-    synthesizer.noteOn = (pitch: number, time: number): void => {
+    synthesizer.noteOn = (pitch: number, time: number, addToCurrentlyPlaying: boolean = true): void => {
+        if (addToCurrentlyPlaying) {
+            synthesizer.currentlyPlayingPitches.push(pitch)
+        }
+
         output.send([0x90 + zeroIndexedChannel, pitch, 0x7f], time)
     }
 
-    synthesizer.noteOff = (pitch: number, time: number): void => {
+    synthesizer.noteOff = (pitch: number, time: number, removeFromCurrentlyPlaying: boolean = true): void => {
         output.send([0x80 + zeroIndexedChannel, pitch, 0x00], time)
+
+        if (removeFromCurrentlyPlaying) {
+            synthesizer.currentlyPlayingPitches = synthesizer.currentlyPlayingPitches.filter(currentPitch => currentPitch !== pitch)
+        }
     }
 
     synthesizer.allNotesOff = (): void => {
         output.send([0xb0 + zeroIndexedChannel, 0x7b, 0x00])
+
+        synthesizer.currentlyPlayingPitches = []
     }
 }
 //#endregion
@@ -96,6 +116,8 @@ function makeIntoMidiSynthesizer(synthesizer: Synthesizer, config: MidiSynthesiz
 
 //#region Synthesizer
 export default class Synthesizer {
+    currentlyPlayingPitches: number[] = []
+
     constructor(_name: PartName, config: SynthesizerConfig) {
         switch (config.type) {
             case SynthesizerType.Log:
@@ -115,11 +137,25 @@ export default class Synthesizer {
         }
     }
 
-    noteOn(_pitch: number, _time: number): void { }
+    noteOn(_pitch: number, _time: number, _addToCurrentlyPlaying: boolean = true): void { }
 
-    noteOff(_pitch: number, _time: number): void { }
+    noteOff(_pitch: number, _time: number, _removeFromCurrentlyPlaying: boolean = true): void { }
 
     allNotesOff(): void { }
+
+    pause(): void {
+        const now = window.performance.now()
+        for (const pitch of this.currentlyPlayingPitches) {
+            this.noteOff(pitch, now, false)
+        }
+    }
+
+    resume(): void {
+        const now = window.performance.now()
+        for (const pitch of this.currentlyPlayingPitches) {
+            this.noteOn(pitch, now, false)
+        }
+    }
 
     render(): HTMLDivElement | null { return null }
 }

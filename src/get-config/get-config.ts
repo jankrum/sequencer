@@ -7,6 +7,7 @@ export default async (): Promise<Config> => ({
                 type: ControllerType.Dom
             },
             synthesizer: {
+                // type: SynthesizerType.Dom,
                 type: SynthesizerType.Midi,
                 midi: {
                     output: 'loopMIDI Port',
@@ -35,6 +36,7 @@ export default async (): Promise<Config> => ({
                 type: ControllerType.Dom
             },
             synthesizer: {
+                // type: SynthesizerType.Dom,
                 type: SynthesizerType.Midi,
                 midi: {
                     output: 'loopMIDI Port',

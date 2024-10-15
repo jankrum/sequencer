@@ -61,9 +61,9 @@ class DomControllerModule {
             return min + (max - min) * Number(input.value) / rangeValues.max
         }
 
-        this.#updateRoot = () => {
-            rootSpan.textContent = computeValue().toString()
-        }
+        (this.#updateRoot = () => {
+            rootSpan.textContent = computeValue().toFixed(0).toString()
+        })()
     }
 
     makeIntoOptionControl(prefix: string, options: string[], suffix: string = ''): void {
@@ -78,9 +78,9 @@ class DomControllerModule {
             return options.length * Number(input.value) / rangeValues.max
         }
 
-        this.#updateRoot = () => {
+        (this.#updateRoot = () => {
             rootSpan.textContent = options[computeValue()]
-        }
+        })()
     }
 
     render(): HTMLDivElement {
