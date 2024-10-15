@@ -13,7 +13,7 @@ export type SimplexMidiConfig = {
 }
 
 //#region Transporter Config
-export const enum TransporterType {
+export enum TransporterType {
     Dom,
     Midi,
     // WebRTC,
@@ -37,7 +37,7 @@ export type TransporterConfig = DomTransporterConfig | MidiTransporterConfig // 
 //#endregion
 
 //#region Controller Config
-export const enum ControllerType {
+export enum ControllerType {
     Dom,
     Midi,
     // WebRTC,
@@ -61,7 +61,7 @@ export type ControllerConfig = DomControllerConfig | MidiControllerConfig // | W
 //#endregion
 
 //#region Synthesizer Config
-export const enum SynthesizerType {
+export enum SynthesizerType {
     Log,
     Dom,
     Midi,
