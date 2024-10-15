@@ -58,11 +58,11 @@ class DomControllerModule {
         spans[SpanType.Suffix].textContent = suffix
 
         const computeValue = this.#computeValue = () => {
-            return min + (max - min) * Number(input.value) / rangeValues.max
+            return min + Math.round((max - min) * Number(input.value) / rangeValues.max)
         }
 
         (this.#updateRoot = () => {
-            rootSpan.textContent = computeValue().toFixed(0).toString()
+            rootSpan.textContent = computeValue().toString()
         })()
     }
 
@@ -75,7 +75,7 @@ class DomControllerModule {
         spans[SpanType.Suffix].textContent = suffix
 
         const computeValue = this.#computeValue = () => {
-            return options.length * Number(input.value) / rangeValues.max
+            return Math.round((options.length - 1) * Number(input.value) / rangeValues.max)
         }
 
         (this.#updateRoot = () => {
