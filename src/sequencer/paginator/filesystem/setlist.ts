@@ -1,8 +1,8 @@
 import { Chart } from '../../../types.ts'
-import twinkleTwinkleLittleStar from './charts/twinkle-twinkle-little-star.ts'
+import helloWorld from './charts/hello-world.ts'
 import bassScale from './charts/bass-scale.ts'
-import leadScale from './charts/lead-scale.ts'
+import twinkleTwinkleLittleStar from './charts/twinkle-twinkle-little-star.ts'
 
-const setlist: Chart[] = [twinkleTwinkleLittleStar, bassScale, leadScale]
+const setlist: Chart[] = [helloWorld, bassScale, twinkleTwinkleLittleStar]
 
 export default setlist

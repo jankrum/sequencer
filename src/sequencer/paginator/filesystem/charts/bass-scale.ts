@@ -2,10 +2,10 @@ import { Chart, BufferEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEv
 import Part from '../../../playbacker/band/part/part.ts'
 import { setInitialTempo, sitOut } from '../helper.ts'
 
-const majorScale = [0, 2, 4, 5, 7, 9, 11, 12]
+const majorScaleSteps = [0, 2, 4, 5, 7, 9, 11, 12]
 
 function makeMajorScaleWalk(part: Part): BufferEvent[] {
-    return majorScale.map(note => note + 24).map((pitch: number, index: number): [BufferNoteOnEvent, BufferNoteOffEvent] => ([{
+    return majorScaleSteps.map(note => note + 24).map((pitch: number, index: number): [BufferNoteOnEvent, BufferNoteOffEvent] => ([{
         position: index,
         part,
         type: BufferEventType.NoteOn,
@@ -20,18 +20,16 @@ function makeMajorScaleWalk(part: Part): BufferEvent[] {
 
 const chart: Chart = {
     title: "Bass Scale",
-    compose: ({ bass, drum, keys, lead }): BufferEvent[] => {
-        return [
-            setInitialTempo(120),
-            ...sitOut(drum, keys, lead),
-            ...makeMajorScaleWalk(bass),
-            {
-                position: majorScale.length,
-                type: BufferEventType.Finish,
-                part: bass
-            },
-        ]
-    },
+    compose: ({ bass, drum, keys, lead }): BufferEvent[] => [
+        setInitialTempo(120),
+        ...sitOut(drum, keys, lead),
+        ...makeMajorScaleWalk(bass),
+        {
+            position: majorScaleSteps.length,
+            type: BufferEventType.Finish,
+            part: bass
+        },
+    ],
 }
 
 export default chart
