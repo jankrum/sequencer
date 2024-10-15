@@ -1,6 +1,14 @@
+// import getConfigFromUrl from './from-url.ts'
+// import getConfigFromUser from './from-user.ts'
+
+// export default async (): Promise<Config> => {
+//     // Cheeky fucker
+//     return getConfigFromUrl() || await getConfigFromUser()
+// }
+
 import { Config, ControllerType, SynthesizerType, TransporterType } from '../types.ts'
 
-export default async (): Promise<Config> => ({
+const dummyConfig: Config = {
     parts: {
         bass: {
             controller: {
@@ -48,4 +56,8 @@ export default async (): Promise<Config> => ({
     transporter: {
         type: TransporterType.Dom
     },
-})
+}
+
+export default async (): Promise<Config> => {
+    return dummyConfig
+}
