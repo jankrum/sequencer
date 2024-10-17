@@ -58,7 +58,7 @@ export default class Band {
                         }
                         break
                     case BufferEventType.NoteOn:
-                        event.part.synthesizer.noteOn(event.pitch, eventTime)
+                        event.part.synthesizer.noteOn(event.pitch, event.velocity, eventTime)
                         break
                     case BufferEventType.NoteOff:
                         event.part.synthesizer.noteOff(event.pitch, eventTime)

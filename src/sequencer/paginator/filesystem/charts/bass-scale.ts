@@ -9,7 +9,8 @@ function makeMajorScaleWalk(part: Part): BufferEvent[] {
         position: index,
         part,
         type: BufferEventType.NoteOn,
-        pitch: pitch
+        pitch: pitch,
+        velocity: 0x7F,
     }, {
         position: index + 0.9,
         part,

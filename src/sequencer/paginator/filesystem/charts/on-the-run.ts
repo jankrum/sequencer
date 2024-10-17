@@ -19,6 +19,7 @@ const chart: Chart = {
                         type: BufferEventType.NoteOn,
                         part: lead,
                         pitch,
+                        velocity: 0x7F,
                     },
                     {
                         position: startPosition + stepDuration - 0.05,

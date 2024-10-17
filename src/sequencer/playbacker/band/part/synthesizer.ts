@@ -4,8 +4,8 @@ import midiAccess from '../../../../midi-access.ts'
 
 //#region LogSynthesizer
 function makeIntoLogSynthesizer(synthesizer: Synthesizer): void {
-    synthesizer.noteOn = (pitch: number, time: number): void => {
-        console.log('noteOn', pitch, time)
+    synthesizer.noteOn = (pitch: number, time: number, velocity: number): void => {
+        console.log('noteOn', pitch, velocity, time)
     }
 
     synthesizer.noteOff = (pitch: number, time: number): void => {
@@ -32,12 +32,12 @@ function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
         messageRow.scrollTop = messageRow.scrollHeight
     }
 
-    synthesizer.noteOn = (pitch: number, time: number, addToCurrentlyPlaying: boolean = true): void => {
+    synthesizer.noteOn = (pitch: number, velocity: number, time: number, addToCurrentlyPlaying: boolean = true): void => {
         if (addToCurrentlyPlaying) {
             synthesizer.currentlyPlayingPitches.push(pitch)
         }
 
-        addMessage(`noteOn ${pitch} ${time.toFixed(0)}`, 'note-on')
+        addMessage(`noteOn ${pitch} ${velocity} ${time.toFixed(0)}`, 'note-on')
     }
 
     synthesizer.noteOff = (pitch: number, time: number, removeFromCurrentlyPlaying: boolean = true): void => {
@@ -80,12 +80,12 @@ function makeIntoMidiSynthesizer(synthesizer: Synthesizer, config: MidiSynthesiz
 
     const zeroIndexedChannel = config.midi.channel - 1
 
-    synthesizer.noteOn = (pitch: number, time: number, addToCurrentlyPlaying: boolean = true): void => {
+    synthesizer.noteOn = (pitch: number, velocity: number, time: number, addToCurrentlyPlaying: boolean = true): void => {
         if (addToCurrentlyPlaying) {
             synthesizer.currentlyPlayingPitches.push(pitch)
         }
 
-        output.send([0x90 + zeroIndexedChannel, pitch, 0x7f], time)
+        output.send([0x90 + zeroIndexedChannel, pitch, velocity], time)
     }
 
     synthesizer.noteOff = (pitch: number, time: number, removeFromCurrentlyPlaying: boolean = true): void => {
@@ -137,7 +137,7 @@ export default class Synthesizer {
         }
     }
 
-    noteOn(_pitch: number, _time: number, _addToCurrentlyPlaying: boolean = true): void { }
+    noteOn(_pitch: number, _velocity: number, _time: number, _addToCurrentlyPlaying: boolean = true): void { }
 
     noteOff(_pitch: number, _time: number, _removeFromCurrentlyPlaying: boolean = true): void { }
 
@@ -153,7 +153,7 @@ export default class Synthesizer {
     resume(): void {
         const now = window.performance.now()
         for (const pitch of this.currentlyPlayingPitches) {
-            this.noteOn(pitch, now, false)
+            this.noteOn(pitch, 31, now, false)
         }
     }
 

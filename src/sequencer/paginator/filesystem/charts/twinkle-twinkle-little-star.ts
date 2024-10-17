@@ -124,6 +124,7 @@ function playTTLS(part: Part): BufferEvent[] {
                     type: BufferEventType.NoteOn,
                     part,
                     pitch: newPitch,
+                    // velocity: 0x7F,
                 } as BufferNoteOnEvent
 
                 const noteOffEvent = {

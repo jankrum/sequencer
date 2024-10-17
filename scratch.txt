@@ -9,8 +9,6 @@ Notes of what to do next:
     - Gonna need to have a signaling server to handle the initial handshake, will also probably need a QR code library
 - Planned tempo changes, accelerando, ritardando 
     - Maybe this isn't in buffer but in the compose func with callbacks and helper.ts
-- Notes having velocity
-    - No need right now
 - Buffer events taking multiple parts for finish events and multiple notes for note-on/note-off events
     - Easy to do
 - Writing more charts

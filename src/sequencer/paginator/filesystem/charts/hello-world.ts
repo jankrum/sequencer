@@ -11,6 +11,7 @@ const chart: Chart = {
             type: BufferEventType.NoteOn,
             part: lead,
             pitch: 60,
+            velocity: 0x7F,
         },
         {
             position: 4,
