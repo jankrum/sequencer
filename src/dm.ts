@@ -1,4 +1,4 @@
-export default function dm(tag: string, attributes: object = {}, ...children: (string | HTMLElement | null)[]): HTMLElement {
+export default function dm(tag: string, attributes: object = {}, ...children: (string | Node | null)[]): HTMLElement {
     const element = document.createElement(tag)
 
     for (const [key, value] of Object.entries(attributes)) {

@@ -1,10 +1,12 @@
+import { Config } from '../types.ts'
+
 // import getConfigFromUrl from './from-url.ts'
 import getConfigFromUser from './from-user.ts'
 
 export default async (): Promise<Config> => {
     // Cheeky fucker
     return /*getConfigFromUrl() ||*/ await getConfigFromUser()
-// }
+}
 
 // import { Config, ControllerType, SynthesizerType, TransporterType } from '../types.ts'
 // import getProblems from './get-problems.ts'

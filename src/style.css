@@ -35,6 +35,39 @@ body {
   margin: 0;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                   Config                                   */
+/* -------------------------------------------------------------------------- */
+
+#config-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+fieldset {
+  margin-bottom: 20px;
+}
+
+legend {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.type-div {
+  margin-bottom: 10px;
+}
+
+label {
+  user-select: none;
+}
+
+input[type="radio"]:disabled+label {
+  text-decoration: line-through;
+}
+
 button {
   color: var(--text-color);
   background-color: var(--background-color);

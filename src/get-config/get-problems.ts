@@ -9,14 +9,20 @@ function getMidiPortProblems(parentName: string, portName: string, direction: 'i
         return problems
     }
 
-    const ports = midiAccess[direction]
+    const map = midiAccess[direction] as MIDIInputMap | MIDIOutputMap
+    const values = map.values()
+    const ports: { name: string }[] = Array.from(values as any)  // TypeScript doesn't know that values is an iterator
 
     if (!ports) {
         problems.push(`No MIDI ${direction}`)
         return problems
     }
 
-    if (!ports.has(portName)) {
+    const port = ports.find(({ name }) => name === portName)
+
+    console.log('port', port)
+
+    if (!port) {
         problems.push(`No MIDI ${direction} named ${portName} for ${parentName}`)
     }
 

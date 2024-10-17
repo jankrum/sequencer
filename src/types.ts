@@ -28,12 +28,12 @@ export type MidiTransporterConfig = {
     midi: DuplexMidiConfig,
 }
 
-// export type WebRTCTransporterConfig = {
+// export type WebrtcTransporterConfig = {
 //     type: TransporterType.WebRTC,
 //     room: string,
 // }
 
-export type TransporterConfig = DomTransporterConfig | MidiTransporterConfig // | WebRTCTransporterConfig
+export type TransporterConfig = DomTransporterConfig | MidiTransporterConfig // | WebrtcTransporterConfig
 //#endregion
 
 //#region Controller Config
@@ -53,7 +53,7 @@ export type MidiControllerConfig = {
 }
 
 // export type WebrtcControllerConfig = {
-//     type: ControllerType.WebRTC,
+//     type: ControllerType.Webrtc,
 //     room: string,
 // }
 

@@ -26,20 +26,22 @@ function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
     const synthesizerRow = dm('div', { class: 'synthesizer-row' }, clearButton, messageRow) as HTMLDivElement
     const div = dm('div', { class: 'synthesizer' }, title, synthesizerRow) as HTMLDivElement
 
+    function addMessage(message: string, className: string): void {
+        const div = dm('div', { class: className }, message) as HTMLDivElement
+        messageRow.appendChild(div)
+        messageRow.scrollTop = messageRow.scrollHeight
+    }
+
     synthesizer.noteOn = (pitch: number, time: number, addToCurrentlyPlaying: boolean = true): void => {
         if (addToCurrentlyPlaying) {
             synthesizer.currentlyPlayingPitches.push(pitch)
         }
 
-        const message = dm('div', { class: 'note-on' }, `noteOn ${pitch} ${time}`) as HTMLDivElement
-
-        messageRow.appendChild(message)
+        addMessage(`noteOn ${pitch} ${time.toFixed(0)}`, 'note-on')
     }
 
     synthesizer.noteOff = (pitch: number, time: number, removeFromCurrentlyPlaying: boolean = true): void => {
-        const message = dm('div', { class: 'note-off' }, `noteOff ${pitch} ${time}`) as HTMLDivElement
-
-        messageRow.appendChild(message)
+        addMessage(`noteOff ${pitch} ${time.toFixed(0)}`, 'note-off')
 
         if (removeFromCurrentlyPlaying) {
             synthesizer.currentlyPlayingPitches = synthesizer.currentlyPlayingPitches.filter(currentPitch => currentPitch !== pitch)
@@ -47,9 +49,7 @@ function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
     }
 
     synthesizer.allNotesOff = (): void => {
-        const message = dm('div', { class: 'all-notes-off' }, 'allNotesOff') as HTMLDivElement
-
-        messageRow.appendChild(message)
+        addMessage('allNotesOff', 'all-notes-off')
 
         synthesizer.currentlyPlayingPitches = []
     }
