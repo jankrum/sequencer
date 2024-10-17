@@ -1,15 +1,15 @@
-Notes of what to do next:
-- Storing config in URL
-    - Potential problem due to URLs being limited in length and converting formless URL text to Typescript-friendly object
+Chopping block:
+- Buffer events taking multiple parts for finish events and multiple notes for note-on/note-off events
+    - Easy to do
 - Clean up code related to config
     - I know this would be good to do, but I don't feel like it right now
+- Storing config in URL
+    - Potential problem due to URLs being limited in length and converting formless URL text to Typescript-friendly object
 - Tone.js integration
     - Pretty big undertaking
 - WebRTC integration
     - Gonna need to have a signaling server to handle the initial handshake, will also probably need a QR code library
 - Planned tempo changes, accelerando, ritardando 
     - Maybe this isn't in buffer but in the compose func with callbacks and helper.ts
-- Buffer events taking multiple parts for finish events and multiple notes for note-on/note-off events
-    - Easy to do
 - Writing more charts
     - 8 step sequencer, mack the knife, moondance, lonely rolling star, bass-line generator, in c
