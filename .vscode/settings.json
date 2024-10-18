@@ -5,6 +5,7 @@
         "Fieldsets",
         "partnames",
         "playbacker",
+        "TTLS",
         "Webrtc"
     ]
 }

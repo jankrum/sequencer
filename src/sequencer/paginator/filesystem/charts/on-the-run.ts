@@ -1,9 +1,10 @@
 import { Chart, BufferEvent, BufferComputeEvent, BufferEventType, } from '../../../../types.ts'
-import { setInitialTempo, sitOut } from '../helper.ts'
+import { sitOut, convertBpmToMpb } from '../helper.ts'
 
 const pitches = [40, 43, 45, 43, 50, 48, 50, 52]
 const runDuration = 2
 const stepDuration = runDuration / pitches.length
+const millisecondsPerBeat = convertBpmToMpb(165)
 
 const chart: Chart = {
     title: "On the Run",
@@ -15,14 +16,14 @@ const chart: Chart = {
                 const startPosition = position + (index * stepDuration)
                 return [
                     {
-                        position: startPosition,
+                        time: startPosition * millisecondsPerBeat,
                         type: BufferEventType.NoteOn,
                         part: lead,
                         pitch,
                         velocity: 0x7F,
                     },
                     {
-                        position: startPosition + stepDuration - 0.05,
+                        time: (startPosition + stepDuration - 0.05) * millisecondsPerBeat,
                         type: BufferEventType.NoteOff,
                         part: lead,
                         pitch,
@@ -40,14 +41,14 @@ const chart: Chart = {
 
         function maybeMakeRun(position: number): BufferComputeEvent {
             return {
-                position: position - 0.1,
+                time: (position - 0.1) * millisecondsPerBeat,
                 type: BufferEventType.Compute,
                 callback: (buffer) => {
                     if (repeatControl.value) {
                         buffer.push(...makeRun(position))
                     } else {
                         buffer.push({
-                            position: position,
+                            time: position * millisecondsPerBeat,
                             type: BufferEventType.Finish,
                             part: lead,
                         })
@@ -57,7 +58,6 @@ const chart: Chart = {
         }
 
         return [
-            setInitialTempo(165),
             ...sitOut(bass, drum, keys),
             maybeMakeRun(0),
         ]

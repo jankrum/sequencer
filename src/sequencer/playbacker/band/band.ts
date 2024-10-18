@@ -29,7 +29,6 @@ export default class Band {
     #loadBuffer: () => void = () => { }
     #startTime = 0
     #durationIntoSong = 0
-    #millisecondsPerBeat = 60000 / 120
     #partsThatAreFinished = new Set<Part>()
 
     constructor(playbacker: Playbacker, config: PartsConfig) {
@@ -47,9 +46,6 @@ export default class Band {
 
             if (event) {
                 switch (event.type) {
-                    case BufferEventType.Tempo:
-                        this.#millisecondsPerBeat = 60000 / event.bpm
-                        break
                     case BufferEventType.Finish:
                         this.#partsThatAreFinished.add(event.part)
                         if (this.#partsThatAreFinished.size === 4) {
@@ -77,7 +73,7 @@ export default class Band {
             return Infinity
         }
 
-        return (this.#buffer[0].position * this.#millisecondsPerBeat) + this.#startTime
+        return this.#buffer[0].time + this.#startTime
     }
 
     changeChart(chart: Chart): void {

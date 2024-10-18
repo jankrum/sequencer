@@ -179,7 +179,7 @@ export type BufferNoteOffEvent = {
 }
 
 export type BufferComputeEvent = {
-    position: MillisecondsIntoSong
+    time: MillisecondsIntoSong
     type: BufferEventType.Compute
     callback: (buffer: BufferEvent[]) => void
 }
