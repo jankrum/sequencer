@@ -7,9 +7,11 @@ export type DuplexMidiConfig = {
     output: string,
 }
 
+export type OneIndexedMidiChannel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16
+
 export type SimplexMidiConfig = {
     output: string,
-    channel: number,
+    channel: OneIndexedMidiChannel,
 }
 
 //#region Transporter Config
@@ -147,47 +149,42 @@ export type Parts = {
 }
 
 export const enum BufferEventType {
-    Tempo,
     Finish,
     NoteOn,
     NoteOff,
     Compute,
 }
 
-export type BufferTempoEvent = {
-    position: number
-    type: BufferEventType.Tempo
-    bpm: number
-}
+export type MillisecondsIntoSong = number
 
 export type BufferFinishEvent = {
-    position: number
-    part: Part
+    time: MillisecondsIntoSong
     type: BufferEventType.Finish
+    part: Part
 }
 
 export type BufferNoteOnEvent = {
-    position: number
-    part: Part
+    time: MillisecondsIntoSong
     type: BufferEventType.NoteOn
+    part: Part
     pitch: number
     velocity: number
 }
 
 export type BufferNoteOffEvent = {
-    position: number
-    part: Part
+    time: MillisecondsIntoSong
     type: BufferEventType.NoteOff
+    part: Part
     pitch: number
 }
 
 export type BufferComputeEvent = {
-    position: number
+    position: MillisecondsIntoSong
     type: BufferEventType.Compute
     callback: (buffer: BufferEvent[]) => void
 }
 
-export type BufferEvent = BufferTempoEvent | BufferFinishEvent | BufferNoteOnEvent | BufferNoteOffEvent | BufferComputeEvent
+export type BufferEvent = BufferFinishEvent | BufferNoteOnEvent | BufferNoteOffEvent | BufferComputeEvent
 
 export type Chart = {
     title: string,

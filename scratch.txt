@@ -1,6 +1,4 @@
 Chopping block:
-- Buffer events taking multiple parts for finish events and multiple notes for note-on/note-off events
-    - Easy to do
 - Clean up code related to config
     - I know this would be good to do, but I don't feel like it right now
 - Storing config in URL
