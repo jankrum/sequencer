@@ -1,35 +1,15 @@
-import { Chart, BufferEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent, BufferFinishEvent } from '../../../../types.ts'
+import { Chart, BufferEvent, } from '../../../../types.ts'
 import Part from '../../../playbacker/band/part/part.ts'
-import { sitOut, convertBpmToMpb } from '../helper.ts'
+import { sitOut, pipe, setTempo, play, finish } from '../helper.ts'
 
-const majorScaleSteps = [0, 2, 4, 5, 7, 9, 11, 12]
-
-const millisecondsPerBeat = convertBpmToMpb(120)
+const majorScale = ['C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3']
 
 function makeMajorScaleWalk(part: Part): BufferEvent[] {
-    const notes = majorScaleSteps.map(note => note + 24).map((pitch: number, index: number): [BufferNoteOnEvent, BufferNoteOffEvent] => ([{
-        time: index * millisecondsPerBeat,
-        part,
-        type: BufferEventType.NoteOn,
-        pitch: pitch,
-        velocity: 0x7F,
-    }, {
-        time: (index + 0.9) * millisecondsPerBeat,
-        part,
-        type: BufferEventType.NoteOff,
-        pitch: pitch
-    }])).flat() as BufferEvent[]
-
-    const finishEvent = {
-        time: majorScaleSteps.length * millisecondsPerBeat,
-        type: BufferEventType.Finish,
-        part,
-    } as BufferFinishEvent
-
-    return [
-        ...notes,
-        finishEvent,
-    ]
+    return pipe(
+        setTempo(120),
+        ...majorScale.map((pitchName, index) => play(part, pitchName, index, 0.9, 0x7F)),
+        finish(part),
+    )
 }
 
 const chart: Chart = {

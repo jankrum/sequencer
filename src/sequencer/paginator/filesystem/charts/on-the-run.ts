@@ -1,7 +1,8 @@
 import { Chart, BufferEvent, BufferComputeEvent, BufferEventType, } from '../../../../types.ts'
-import { sitOut, convertBpmToMpb } from '../helper.ts'
+import { convertPitchNameToMidiNumber, sitOut, convertBpmToMpb } from '../helper.ts'
 
-const pitches = [40, 43, 45, 43, 50, 48, 50, 52]
+// const pitches = [40, 43, 45, 43, 50, 48, 50, 52]
+const pitches = ['E3', 'G3', 'A3', 'G3', 'D4', 'C4', 'D4', 'E4'].map(convertPitchNameToMidiNumber)
 const runDuration = 2
 const stepDuration = runDuration / pitches.length
 const millisecondsPerBeat = convertBpmToMpb(165)
