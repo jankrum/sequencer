@@ -1,114 +1,74 @@
-import { Chart, BufferEvent, BufferEventType, BufferComputeEvent, BufferNoteOnEvent, BufferNoteOffEvent, BufferFinishEvent } from '../../../../types.ts'
+import { PipeOperation, convertPitchNameToMidiNumber, play, pipe, finish, setTempo, } from '../helper.ts'
 import Part from '../../../playbacker/band/part/part.ts'
-import { convertPitchNameToMidiNumber, sitOut, convertBpmToMpb } from '../helper.ts'
+import { Chart, BufferEvent, } from '../../../../types.ts'
 
 type Note = [string, number, number]
 
 const pitchesPositionsAndDurations: Note[] = [
-    ['C4', 0, 1],
-    ['C4', 1, 1],
-    ['G4', 2, 1],
-    ['G4', 3, 1],
-    ['A4', 4, 1],
-    ['A4', 5, 1],
-    ['G4', 6, 2],
-    ['F4', 8, 1],
-    ['F4', 9, 1],
-    ['E4', 10, 1],
-    ['E4', 11, 1],
-    ['D4', 12, 1],
-    ['D4', 13, 1],
-    ['C4', 14, 2],
-    ['G4', 16, 1],
-    ['G4', 17, 1],
-    ['F4', 18, 1],
-    ['F4', 19, 1],
-    ['E4', 20, 1],
-    ['E4', 21, 1],
-    ['D4', 22, 2],
-    ['G4', 24, 1],
-    ['G4', 25, 1],
-    ['F4', 26, 1],
-    ['F4', 27, 1],
-    ['E4', 28, 1],
-    ['E4', 29, 1],
-    ['D4', 30, 2],
-    ['C4', 32, 1],
-    ['C4', 33, 1],
-    ['G4', 34, 1],
-    ['G4', 35, 1],
-    ['A4', 36, 1],
-    ['A4', 37, 1],
-    ['G4', 38, 2],
-    ['F4', 40, 1],
-    ['F4', 41, 1],
-    ['E4', 42, 1],
-    ['E4', 43, 1],
-    ['D4', 44, 1],
-    ['D4', 45, 1],
+    ['C4', 0, 0.9],
+    ['C4', 1, 0.9],
+    ['G4', 2, 0.9],
+    ['G4', 3, 0.9],
+    ['A4', 4, 0.9],
+    ['A4', 5, 0.9],
+    ['G4', 6, 1.9],
+    ['F4', 8, 0.9],
+    ['F4', 9, 0.9],
+    ['E4', 10, 0.9],
+    ['E4', 11, 0.9],
+    ['D4', 12, 0.9],
+    ['D4', 13, 0.9],
+    ['C4', 14, 1.9],
+    ['G4', 16, 0.9],
+    ['G4', 17, 0.9],
+    ['F4', 18, 0.9],
+    ['F4', 19, 0.9],
+    ['E4', 20, 0.9],
+    ['E4', 21, 0.9],
+    ['D4', 22, 1.9],
+    ['G4', 24, 0.9],
+    ['G4', 25, 0.9],
+    ['F4', 26, 0.9],
+    ['F4', 27, 0.9],
+    ['E4', 28, 0.9],
+    ['E4', 29, 0.9],
+    ['D4', 30, 1.9],
+    ['C4', 32, 0.9],
+    ['C4', 33, 0.9],
+    ['G4', 34, 0.9],
+    ['G4', 35, 0.9],
+    ['A4', 36, 0.9],
+    ['A4', 37, 0.9],
+    ['G4', 38, 1.9],
+    ['F4', 40, 0.9],
+    ['F4', 41, 0.9],
+    ['E4', 42, 0.9],
+    ['E4', 43, 0.9],
+    ['D4', 44, 0.9],
+    ['D4', 45, 0.9],
     ['C4', 46, 2],
 ]
 
-function playTTLS(part: Part): BufferEvent[] {
-    const millisecondsPerBeat = convertBpmToMpb(120)
+function playTTLS(lead: Part): PipeOperation[] {
+    const octaveJumpControl = lead.controller.getRangeControl('8va chance: ', 0, 100, '%')
 
-    const octaveJumpControl = part.controller.getRangeControl('8va chance: ', 0, 100, '%')
-
-    function makeJumpEvent([pitchName, position, duration]: Note): BufferComputeEvent {
+    return pitchesPositionsAndDurations.map(([pitchName, position, duration]) => {
         const roll = Math.random() * 100
+        const midiPitch = convertPitchNameToMidiNumber(pitchName)
+        const pitchFunction = (): number => octaveJumpControl.value > roll ? midiPitch + 12 : midiPitch
 
-        return {
-            time: (position - 0.1) * millisecondsPerBeat,
-            type: BufferEventType.Compute,
-            callback: (buffer: BufferEvent[]) => {
-                const chance = octaveJumpControl.value
-
-                const pitch = convertPitchNameToMidiNumber(pitchName)
-
-                const newPitch = roll < chance ? pitch + 12 : pitch
-
-                const noteOnEvent: BufferNoteOnEvent = {
-                    time: position * millisecondsPerBeat,
-                    type: BufferEventType.NoteOn,
-                    part,
-                    pitch: newPitch,
-                    velocity: 0x7F,
-                }
-
-                const noteOffEvent: BufferNoteOffEvent = {
-                    time: (position + duration - 0.1) * millisecondsPerBeat,
-                    type: BufferEventType.NoteOff,
-                    part,
-                    pitch: newPitch,
-                }
-
-                buffer.unshift(noteOnEvent, noteOffEvent)
-            }
-        }
-    }
-
-    const computeEvents = pitchesPositionsAndDurations.map(makeJumpEvent)
-
-    const [_, lastPosition, lastDuration] = pitchesPositionsAndDurations.at(-1) ?? [0, 0, 0]
-
-    const finishEvent: BufferFinishEvent = {
-        time: (lastDuration + lastPosition + 0.1) * millisecondsPerBeat,
-        type: BufferEventType.Finish,
-        part,
-    }
-
-    return [
-        ...computeEvents,
-        finishEvent,
-    ]
+        return play(lead, pitchFunction, position, duration, 0x7F)
+    })
 }
 
 const chart: Chart = {
-    title: "Twinkle Twinkle Little Star",
-    compose: ({ bass, drum, keys, lead }): BufferEvent[] => [
-        ...sitOut(bass, drum, keys),
+    title: 'Twinkle Twinkle Little Star',
+    compose: ({ bass, drum, keys, lead }): BufferEvent[] => pipe(
+        finish(bass, drum, keys),
+        setTempo(120),
         ...playTTLS(lead),
-    ],
+        finish(lead),
+    ),
 }
 
 export default chart

@@ -83,8 +83,8 @@ export default class Band {
                 part.controller.clear()
             }
 
-            this.#buffer = chart.compose(this.#parts)
-            // console.debug('buffer', this.#buffer = chart.compose(this.#parts))
+            // this.#buffer = chart.compose(this.#parts)
+            console.debug('buffer', this.#buffer = chart.compose(this.#parts))
         })()
     }
 
