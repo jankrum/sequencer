@@ -240,6 +240,8 @@ const sections: { [key: string]: Section } = {
     },
 }
 
+const order = ['1-16', '17-26', '27-32', '1-16', '17-26', '33-38',]
+
 function makeBassPart(bass: Part, song: Section): PipeOperation[] {
     const notes: PipeOperation[] = []
 
@@ -261,8 +263,6 @@ function makeLeadPart(lead: Part, song: Section): PipeOperation[] {
 
     return notes
 }
-
-const order = ['1-16', '17-26', '27-32', '1-16', '17-26', '33-38',]
 
 const song = joinSections(sections, order)
 
