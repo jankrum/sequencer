@@ -1,8 +1,8 @@
-import { PipeOperation, convertPitchNameToMidiNumber, play, pipe, finish, setTempo, } from '../helper.ts'
+import { PipeOperation, SpecificPitch, Beats, BeatsIntoSong, convertSpecificPitchToMidiNumber, play, pipe, finish, setTempo, } from '../helper.ts'
 import Part from '../../../playbacker/band/part/part.ts'
 import { Chart, BufferEvent, } from '../../../../types.ts'
 
-type Note = [string, number, number]
+type Note = [SpecificPitch, BeatsIntoSong, Beats]
 
 const pitchesPositionsAndDurations: Note[] = [
     ['C4', 0, 0.9],
@@ -54,7 +54,7 @@ function playTTLS(lead: Part): PipeOperation[] {
 
     return pitchesPositionsAndDurations.map(([pitchName, position, duration]) => {
         const roll = Math.random() * 100
-        const midiPitch = convertPitchNameToMidiNumber(pitchName)
+        const midiPitch = convertSpecificPitchToMidiNumber(pitchName)
         const pitchFunction = (): number => octaveJumpControl.value > roll ? midiPitch + 12 : midiPitch
 
         return play(lead, pitchFunction, position, duration, 0x7F)

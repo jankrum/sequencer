@@ -156,6 +156,7 @@ export const enum BufferEventType {
 }
 
 export type MillisecondsIntoSong = number
+export type PitchNumber = number
 
 export type BufferFinishEvent = {
     time: MillisecondsIntoSong
@@ -167,7 +168,7 @@ export type BufferNoteOnEvent = {
     time: MillisecondsIntoSong
     type: BufferEventType.NoteOn
     part: Part
-    pitch: number
+    pitch: PitchNumber
     velocity: number
 }
 
@@ -175,7 +176,7 @@ export type BufferNoteOffEvent = {
     time: MillisecondsIntoSong
     type: BufferEventType.NoteOff
     part: Part
-    pitch: number
+    pitch: PitchNumber
 }
 
 export type BufferComputeEvent = {

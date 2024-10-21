@@ -1,46 +1,92 @@
-import { BufferFinishEvent, BufferEventType, BufferEvent, BufferNoteOnEvent, BufferNoteOffEvent, BufferComputeEvent, } from '../../../types.ts'
+import { PitchNumber, BufferFinishEvent, BufferEventType, BufferEvent, BufferNoteOnEvent, BufferNoteOffEvent, BufferComputeEvent, } from '../../../types.ts'
 import Part from '../../playbacker/band/part/part.ts'
 
 export function insertEventsIntoBufferSorted(buffer: BufferEvent[], ...events: BufferEvent[]): BufferEvent[] {
     return [...buffer, ...events].sort((a, b) => a.time - b.time)
 }
 
-export function convertPitchNameToMidiNumber(pitch: string): number {
-    const pitchName = pitch[0].toUpperCase()
-    const octave = parseInt(pitch[1])
+export type Beats = number
+export type BeatsIntoSong = Beats
+
+export type PitchLetters = 'C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B'
+const pitchLetterPattern = /[CDEFGAB]/
+export type Accidental = '' | '♮' | 'b' | 'bb' | '#' | '##'
+const accidentalPattern = /♮|b{1,2}|#{1,2}/
+export type Octave = -2 | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+const octavePattern = /-?[0-8]/
+export type PitchClass = `${PitchLetters}${Accidental}`
+const pitchClassPattern = /[CDEFGAB](♮|b{1,2}|#{1,2})?/
+export type SpecificPitch = `${PitchClass}${Octave}`
+
+export function convertSpecificPitchToMidiNumber(specificPitch: SpecificPitch): PitchNumber {
+    const pitchClass = specificPitch.match(pitchClassPattern)?.[0]
+
+    if (pitchClass === undefined) {
+        throw new Error(`Invalid pitch class: ${specificPitch}`)
+    }
+
+    const pitchLetter = pitchClass.match(pitchLetterPattern)?.[0]
+
+    if (pitchLetter === undefined) {
+        throw new Error(`Invalid pitch letter: ${pitchClass}`)
+    }
+
+    const pitchLetterOffset = {
+        'C': 0,
+        'D': 2,
+        'E': 4,
+        'F': 5,
+        'G': 7,
+        'A': 9,
+        'B': 11,
+    }[pitchLetter]
+
+    if (pitchLetterOffset === undefined) {
+        throw new Error(`Invalid pitch letter: ${pitchClass}`)
+    }
+
+    const accidental = pitchClass.match(accidentalPattern)?.[0] || '♮'
+
+    const accidentalOffset = {
+        '♮': 0,
+        'b': -1,
+        'bb': -2,
+        '#': 1,
+        '##': 2,
+    }[accidental]
+
+    if (accidentalOffset === undefined) {
+        throw new Error(`Invalid accidental: ${pitchClass}`)
+    }
+
+    const octave = Number(specificPitch.match(octavePattern)?.[0])
 
     if (isNaN(octave)) {
-        throw new Error(`Invalid pitch: ${pitch}`)
+        throw new Error(`Invalid octave: ${pitchClass}`)
     }
 
-    const pitchOffset = {
-        C: 0,
-        D: 2,
-        E: 4,
-        F: 5,
-        G: 7,
-        A: 9,
-        B: 11,
-    }[pitchName]
+    const octaveOffset = (octave + 1) * 12
 
-    if (pitchOffset === undefined) {
-        throw new Error(`Invalid pitch name: ${pitchName}`)
+    const midiNumber = pitchLetterOffset + accidentalOffset + octaveOffset
+
+    if (midiNumber < 0 || midiNumber > 127) {
+        throw new Error(`Out of MIDI range: ${pitchClass}`)
     }
 
-    return 12 * octave + pitchOffset
+    return midiNumber
 }
 
 export function convertBpmToMpb(bpm: number): number {
     return 60000 / bpm
 }
 
-export function sitOut(...parts: Part[]): BufferFinishEvent[] {
-    return parts.map((part): BufferFinishEvent => ({
-        time: -Infinity,
-        type: BufferEventType.Finish,
-        part,
-    }))
-}
+// export function sitOut(...parts: Part[]): BufferFinishEvent[] {
+//     return parts.map((part): BufferFinishEvent => ({
+//         time: -Infinity,
+//         type: BufferEventType.Finish,
+//         part,
+//     }))
+// }
 
 type PipeState = {
     millisecondsPerBeat: number
@@ -64,7 +110,11 @@ export function setTempo(bpm: number): PipeOperation {
     return (initialState) => Object.assign({}, initialState, { millisecondsPerBeat: convertBpmToMpb(bpm) })
 }
 
-export function play(part: Part, pitch: number | string | (() => number), startPosition: number, duration: number, velocity: number): PipeOperation {
+function tastefullyShortenDuration(duration: Beats): Beats {
+    return Math.max(duration - 0.1, duration * 0.9)
+}
+
+export function play(part: Part, pitch: number | SpecificPitch | (() => number), startPosition: BeatsIntoSong, duration: Beats, velocity: number): PipeOperation {
     if (typeof pitch === 'function') {
         return (initialState) => {
             const { millisecondsPerBeat } = initialState
@@ -80,7 +130,7 @@ export function play(part: Part, pitch: number | string | (() => number), startP
                 }
 
                 const noteOffEvent: BufferNoteOffEvent = {
-                    time: (startPosition + duration) * millisecondsPerBeat,
+                    time: (startPosition + tastefullyShortenDuration(duration)) * millisecondsPerBeat,
                     type: BufferEventType.NoteOff,
                     part,
                     pitch: pitchValue,
@@ -97,14 +147,11 @@ export function play(part: Part, pitch: number | string | (() => number), startP
 
             return Object.assign({}, initialState, {
                 position: startPosition + duration,
-                bufferEvents: [
-                    ...initialState.bufferEvents,
-                    computeEvent,
-                ]
+                bufferEvents: insertEventsIntoBufferSorted(initialState.bufferEvents, computeEvent)
             })
         }
     } else {
-        const midiPitch = typeof pitch === 'number' ? pitch : convertPitchNameToMidiNumber(pitch)
+        const midiPitch = typeof pitch === 'number' ? pitch : convertSpecificPitchToMidiNumber(pitch)
 
         return (initialState) => {
             const { millisecondsPerBeat } = initialState
@@ -118,7 +165,7 @@ export function play(part: Part, pitch: number | string | (() => number), startP
             }
 
             const noteOffEvent: BufferNoteOffEvent = {
-                time: (startPosition + duration) * millisecondsPerBeat,
+                time: (startPosition + tastefullyShortenDuration(duration)) * millisecondsPerBeat,
                 type: BufferEventType.NoteOff,
                 part,
                 pitch: midiPitch,
@@ -126,11 +173,7 @@ export function play(part: Part, pitch: number | string | (() => number), startP
 
             return Object.assign({}, initialState, {
                 position: startPosition + duration,
-                bufferEvents: [
-                    ...initialState.bufferEvents,
-                    noteOnEvent,
-                    noteOffEvent,
-                ]
+                bufferEvents: insertEventsIntoBufferSorted(initialState.bufferEvents, noteOnEvent, noteOffEvent)
             })
         }
     }

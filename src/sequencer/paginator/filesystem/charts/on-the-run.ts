@@ -1,15 +1,15 @@
 import { Chart, BufferEvent, BufferComputeEvent, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent, } from '../../../../types.ts'
 import Part from '../../../playbacker/band/part/part.ts'
-import { convertPitchNameToMidiNumber, convertBpmToMpb, pipe, finish, PipeOperation, } from '../helper.ts'
+import { convertSpecificPitchToMidiNumber, SpecificPitch, Beats, convertBpmToMpb, pipe, finish, PipeOperation, } from '../helper.ts'
 
-const pitches = ['E3', 'G3', 'A3', 'G3', 'D4', 'C4', 'D4', 'E4']
-const runDuration = 2
-const stepDuration = runDuration / pitches.length
+const pitches: SpecificPitch[] = ['E3', 'G3', 'A3', 'G3', 'D4', 'C4', 'D4', 'E4']
+const runDuration: Beats = 2
+const stepDuration: Beats = runDuration / pitches.length
 const millisecondsPerBeat = convertBpmToMpb(165)
 
 function repeatRun(lead: Part): PipeOperation {
     // Doing this here to avoid doing it in the callback
-    const midiPitches = pitches.map(convertPitchNameToMidiNumber)
+    const midiPitches = pitches.map(convertSpecificPitchToMidiNumber)
 
     return (initialState) => {
         // This control determines if the run should repeat

@@ -1,7 +1,7 @@
 import { Chart, BufferEvent, } from '../../../../types.ts'
-import { pipe, finish, setTempo, play, } from '../helper.ts'
+import { SpecificPitch, pipe, finish, setTempo, play, } from '../helper.ts'
 
-const majorScale = ['C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3']
+const majorScale: SpecificPitch[] = ['C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3']
 
 const chart: Chart = {
     title: 'Bass Scale',

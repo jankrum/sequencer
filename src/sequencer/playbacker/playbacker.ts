@@ -8,12 +8,12 @@ export default class Playbacker {
     #band: Band
 
     constructor(config: PartsConfig) {
-        console.debug('Playbacker', config)
+        // console.debug('Playbacker', config)
         this.#band = new Band(this, config)
     }
 
     changeChart(chart: Chart): void {
-        console.debug('changeChart', chart)
+        // console.debug('changeChart', chart)
         this.#band.changeChart(chart)
         if (this.#playbackState != PlaybackState.Stopped) {
             this.stop()
@@ -23,15 +23,15 @@ export default class Playbacker {
     play(): void {
         switch (this.#playbackState) {
             case PlaybackState.Playing:
-                console.debug('already playing')
+                // console.debug('already playing')
                 break
             case PlaybackState.Paused:
-                console.debug('resume')
+                // console.debug('resume')
                 this.#subscription(PlaybackAction.Resume)
                 this.#playbackState = PlaybackState.Playing
                 break
             case PlaybackState.Stopped:
-                console.debug('play')
+                // console.debug('play')
                 this.#subscription(PlaybackAction.Play)
                 this.#playbackState = PlaybackState.Playing
                 break
@@ -41,15 +41,15 @@ export default class Playbacker {
     pause(): void {
         switch (this.#playbackState) {
             case PlaybackState.Playing:
-                console.debug('pause')
+                // console.debug('pause')
                 this.#subscription(PlaybackAction.Pause)
                 this.#playbackState = PlaybackState.Paused
                 break
             case PlaybackState.Paused:
-                console.debug('already paused')
+                // console.debug('already paused')
                 break
             case PlaybackState.Stopped:
-                console.debug('already stopped')
+                // console.debug('already stopped')
                 break
         }
     }
@@ -57,17 +57,17 @@ export default class Playbacker {
     stop(): void {
         switch (this.#playbackState) {
             case PlaybackState.Playing:
-                console.debug('stop')
+                // console.debug('stop')
                 this.#subscription(PlaybackAction.Stop)
                 this.#playbackState = PlaybackState.Stopped
                 break
             case PlaybackState.Paused:
-                console.debug('stop')
+                // console.debug('stop')
                 this.#subscription(PlaybackAction.Stop)
                 this.#playbackState = PlaybackState.Stopped
                 break
             case PlaybackState.Stopped:
-                console.debug('already stopped')
+                // console.debug('already stopped')
                 break
         }
     }
