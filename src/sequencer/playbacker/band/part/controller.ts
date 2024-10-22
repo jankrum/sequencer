@@ -136,6 +136,8 @@ function makeIntoDomController(controller: Controller): void {
             controllerRow.classList.toggle('hidden')
         })
 
+        controllerRow.classList.add('hidden')
+
         return dm('div', { class: 'controller' }, title, controllerRow) as HTMLDivElement
     }
 }

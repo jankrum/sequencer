@@ -62,6 +62,8 @@ function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
         synthesizerRow.classList.toggle('hidden')
     })
 
+    synthesizerRow.classList.add('hidden')
+
     synthesizer.render = (): HTMLDivElement => div
 }
 //#endregion
