@@ -1,8 +1,8 @@
 // https://musescore.com/user/34876540/scores/8425946
 
-import { Chart, BufferEvent, } from '../../../../types.ts'
+import { Chart, BufferEvent, PitchNumber, } from '../../../../types.ts'
 import Part from '../../../playbacker/band/part/part.ts'
-import { SpecificPitch, BeatsIntoSong, Beats, PitchClass, pipe, finish, setTempo, PipeOperation, play, } from '../helper.ts'
+import { SpecificPitch, BeatsIntoSong, Beats, PitchClass, pipe, finish, setTempo, setSwing, PipeOperation, play, convertSpecificPitchToMidiNumber, } from '../helper.ts'
 
 type Note = [pitch: SpecificPitch, position: BeatsIntoSong, duration: Beats]
 
@@ -55,7 +55,6 @@ const sections: { [key: string]: Section } = {
     '1-16': {
         length: 64,
         melody: [
-            //----------------------------------------
             ['C5', 0, 1],
             ['B4', 1, 1],
             ['A4', 2, 0.5],
@@ -202,7 +201,7 @@ const sections: { [key: string]: Section } = {
             ['C4', 8.5, 1],
             ['C4', 9.5, 3.5], //---------------------
             ['C4', 13, 2],
-            ['B4', 15, 1],
+            ['D4', 15, 1],
             //----------------------------------------
             ['C4', 16, 4],
         ],
@@ -245,9 +244,31 @@ const order = ['1-16', '17-26', '27-32', '1-16', '17-26', '33-38',]
 function makeBassPart(bass: Part, song: Section): PipeOperation[] {
     const notes: PipeOperation[] = []
 
-    for (const { root, position, duration } of song.chords) {
-        for (let i = 0; i < duration; i += 1) {
-            notes.push(play(bass, `${root}1`, position + i, 0.7, 0x7F))
+    const lowestBassNote = convertSpecificPitchToMidiNumber('E1')
+
+    function bringIntoBassRange(pitch: PitchNumber): PitchNumber {
+        return pitch >= lowestBassNote ? pitch : bringIntoBassRange(pitch + 12)
+    }
+
+    for (const { root, quality, extension, position, duration } of song.chords) {
+        const rootNote = convertSpecificPitchToMidiNumber(`${root}1`)
+        const bassRoot = bringIntoBassRange(rootNote)
+        const third = quality === 'major' ? bassRoot + 4 : bassRoot + 3
+        const fifth = extension === '7(b5)' ? bassRoot + 6 : bassRoot + 7
+        const extensionNote = extension === '6' ? bassRoot + 9 : extension === '7' ? bassRoot + 10 : extension === 'maj7' ? bassRoot + 11 : extension === '7(b5)' ? bassRoot + 10 : bassRoot + 12
+
+        if (duration === 4) {
+            notes.push(play(bass, bassRoot, position, 1, 0x7F))
+            notes.push(play(bass, third, position + 1, 1, 0x7F))
+            notes.push(play(bass, fifth, position + 2, 1, 0x7F))
+            notes.push(play(bass, extensionNote, position + 3, 1, 0x7F))
+        } else if (duration === 2) {
+            notes.push(play(bass, bassRoot, position, 1, 0x7F))
+            notes.push(play(bass, fifth, position + 1, 1, 0x7F))
+        } else {
+            for (let i = 0; i < duration; i++) {
+                notes.push(play(bass, i % 2 === 0 ? bassRoot : fifth, position + i, 1, 0x7F))
+            }
         }
     }
 
@@ -274,9 +295,10 @@ const chart: Chart = {
         finish(drum, keys),
         setTempo(118),
         // setTempo(240),
-        ...makeBassPart(bass, song),
+        setSwing(0.25, 1),
+        ...makeBassPart(bass, song).slice(0, -1),
         ...makeLeadPart(lead, song),
-        finish(bass),
+        finish(bass, lead),
     ),
 }
 

@@ -5,6 +5,8 @@ export function insertEventsIntoBufferSorted(buffer: BufferEvent[], ...events: B
     return [...buffer, ...events].sort((a, b) => a.time - b.time)
 }
 
+export type Milliseconds = number
+export type SwingAmount = number
 export type Beats = number
 export type BeatsIntoSong = Beats
 
@@ -89,8 +91,10 @@ export function convertBpmToMpb(bpm: number): number {
 // }
 
 type PipeState = {
-    millisecondsPerBeat: number
-    position: number
+    millisecondsPerBeat: Milliseconds
+    swingAmount: SwingAmount
+    swingDivision: Beats  // How many beats the swing is applied to, 2 will mean one beat is stretched and the next is compressed, 1 will mean the downbeat is stretched and the upbeat is compressed
+    position: BeatsIntoSong
     bufferEvents: BufferEvent[]
 }
 
@@ -99,6 +103,8 @@ export type PipeOperation = (state: PipeState) => PipeState
 export function pipe(...operations: any): BufferEvent[] {
     const initialState: PipeState = {
         millisecondsPerBeat: convertBpmToMpb(120),
+        swingAmount: 0,
+        swingDivision: 1,
         position: -Infinity,
         bufferEvents: []
     }
@@ -110,6 +116,23 @@ export function setTempo(bpm: number): PipeOperation {
     return (initialState) => Object.assign({}, initialState, { millisecondsPerBeat: convertBpmToMpb(bpm) })
 }
 
+export function setSwing(swingAmount: SwingAmount, swingDivision: Beats): PipeOperation {
+    return (initialState) => Object.assign({}, initialState, { swingAmount, swingDivision })
+}
+
+export function computeBeatTiming(position: BeatsIntoSong, millisecondsPerBeat: Milliseconds, swingAmount: SwingAmount, swingDivision: Beats): Milliseconds {
+    if (position === -Infinity || position === Infinity) {
+        return position
+    }
+
+    const positionWithinDivision = position % swingDivision
+    const positionOfDivision = swingDivision * Math.floor(position / swingDivision)
+    const isFirstPart = positionWithinDivision < (swingDivision / 2)
+    const swungPositionWithinDivision = isFirstPart ? (swingAmount + 1) * positionWithinDivision : (1 - swingAmount) * positionWithinDivision + (swingAmount * swingDivision)
+    const swungPosition = positionOfDivision + swungPositionWithinDivision
+    return swungPosition * millisecondsPerBeat
+}
+
 function tastefullyShortenDuration(duration: Beats): Beats {
     return Math.max(duration - 0.1, duration * 0.9)
 }
@@ -117,12 +140,14 @@ function tastefullyShortenDuration(duration: Beats): Beats {
 export function play(part: Part, pitch: number | SpecificPitch | (() => number), startPosition: BeatsIntoSong, duration: Beats, velocity: number): PipeOperation {
     if (typeof pitch === 'function') {
         return (initialState) => {
-            const { millisecondsPerBeat } = initialState
+            const { millisecondsPerBeat, swingAmount, swingDivision } = initialState
+
+            const noteOnTime = computeBeatTiming(startPosition, millisecondsPerBeat, swingAmount, swingDivision)
 
             const callback = (buffer: BufferEvent[]) => {
                 const pitchValue = pitch()
                 const noteOnEvent: BufferNoteOnEvent = {
-                    time: startPosition * millisecondsPerBeat,
+                    time: noteOnTime,
                     type: BufferEventType.NoteOn,
                     part,
                     pitch: pitchValue,
@@ -130,7 +155,7 @@ export function play(part: Part, pitch: number | SpecificPitch | (() => number),
                 }
 
                 const noteOffEvent: BufferNoteOffEvent = {
-                    time: (startPosition + tastefullyShortenDuration(duration)) * millisecondsPerBeat,
+                    time: computeBeatTiming(startPosition + tastefullyShortenDuration(duration), millisecondsPerBeat, swingAmount, swingDivision),
                     type: BufferEventType.NoteOff,
                     part,
                     pitch: pitchValue,
@@ -140,7 +165,7 @@ export function play(part: Part, pitch: number | SpecificPitch | (() => number),
             }
 
             const computeEvent: BufferComputeEvent = {
-                time: startPosition * millisecondsPerBeat - 100,
+                time: noteOnTime - 100,
                 type: BufferEventType.Compute,
                 callback,
             }
@@ -154,10 +179,10 @@ export function play(part: Part, pitch: number | SpecificPitch | (() => number),
         const midiPitch = typeof pitch === 'number' ? pitch : convertSpecificPitchToMidiNumber(pitch)
 
         return (initialState) => {
-            const { millisecondsPerBeat } = initialState
+            const { millisecondsPerBeat, swingAmount, swingDivision } = initialState
 
             const noteOnEvent: BufferNoteOnEvent = {
-                time: startPosition * millisecondsPerBeat,
+                time: computeBeatTiming(startPosition, millisecondsPerBeat, swingAmount, swingDivision),
                 type: BufferEventType.NoteOn,
                 part,
                 pitch: midiPitch,
@@ -165,7 +190,7 @@ export function play(part: Part, pitch: number | SpecificPitch | (() => number),
             }
 
             const noteOffEvent: BufferNoteOffEvent = {
-                time: (startPosition + tastefullyShortenDuration(duration)) * millisecondsPerBeat,
+                time: computeBeatTiming(startPosition + tastefullyShortenDuration(duration), millisecondsPerBeat, swingAmount, swingDivision),
                 type: BufferEventType.NoteOff,
                 part,
                 pitch: midiPitch,
@@ -181,10 +206,10 @@ export function play(part: Part, pitch: number | SpecificPitch | (() => number),
 
 export function finish(...parts: Part[]): PipeOperation {
     return (initialState) => {
-        const { position, millisecondsPerBeat, bufferEvents } = initialState
+        const { position, millisecondsPerBeat, bufferEvents, swingAmount, swingDivision } = initialState
 
         const finishEvents = parts.map((part): BufferFinishEvent => ({
-            time: (position * millisecondsPerBeat),
+            time: computeBeatTiming(position, millisecondsPerBeat, swingAmount, swingDivision),
             type: BufferEventType.Finish,
             part,
         }))
