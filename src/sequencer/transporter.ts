@@ -1,4 +1,4 @@
-import { TransporterConfig, TransporterType, PlaybackState } from '../types.ts'
+import { TransporterConfig, TransporterType, PlaybackState, } from '../types.ts'
 import dm from '../dm.ts'
 import Paginator from './paginator/paginator.ts'
 import Playbacker from './playbacker/playbacker.ts'

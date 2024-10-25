@@ -1,4 +1,4 @@
-import { DuplexMidiConfig, SimplexMidiConfig, TransporterConfig, TransporterType, PartConfig, PartName, ControllerConfig, SynthesizerConfig, SynthesizerType, ControllerType, PartsConfig, Config } from '../types.ts'
+import { /*DuplexMidiConfig,*/ SimplexMidiConfig, TransporterConfig, TransporterType, PartConfig, PartName, ControllerConfig, SynthesizerConfig, SynthesizerType, ControllerType, PartsConfig, Config, } from '../types.ts'
 import midiAccess from '../midi-access.ts'
 
 function getMidiPortProblems(parentName: string, portName: string, direction: 'inputs' | 'outputs'): string[] {
@@ -20,8 +20,6 @@ function getMidiPortProblems(parentName: string, portName: string, direction: 'i
 
     const port = ports.find(({ name }) => name === portName)
 
-    console.log('port', port)
-
     if (!port) {
         problems.push(`No MIDI ${direction} named ${portName} for ${parentName}`)
     }
@@ -29,34 +27,34 @@ function getMidiPortProblems(parentName: string, portName: string, direction: 'i
     return problems
 }
 
-function getDuplexMidiProblems(parentName: string, config: DuplexMidiConfig): string[] {
-    const problems: string[] = []
+// function getDuplexMidiProblems(parentName: string, config: DuplexMidiConfig): string[] {
+//     const problems: string[] = []
 
-    const { input, output } = config
+//     const { input, output } = config
 
-    if (!input) {
-        problems.push(`No MIDI input for ${parentName}`)
-    } else {
-        problems.push(...getMidiPortProblems(parentName, input, 'inputs'))
-    }
+//     if (!input) {
+//         problems.push(`No MIDI input for ${parentName}`)
+//     } else {
+//         problems.push(...getMidiPortProblems(parentName, input, 'inputs'))
+//     }
 
-    if (!output) {
-        problems.push(`No MIDI output for ${parentName}`)
-    } else {
-        problems.push(...getMidiPortProblems(parentName, output, 'outputs'))
-    }
+//     if (!output) {
+//         problems.push(`No MIDI output for ${parentName}`)
+//     } else {
+//         problems.push(...getMidiPortProblems(parentName, output, 'outputs'))
+//     }
 
-    if (problems.length) {
-        return problems
-    }
+//     if (problems.length) {
+//         return problems
+//     }
 
-    if (input === output) {
-        problems.push(`Input and output are the same for ${parentName}`)
-        return problems
-    }
+//     if (input === output) {
+//         problems.push(`Input and output are the same for ${parentName}`)
+//         return problems
+//     }
 
-    return problems
-}
+//     return problems
+// }
 
 function getSimplexMidiProblems(parentName: string, config: SimplexMidiConfig): string[] {
     const problems: string[] = []
@@ -92,21 +90,21 @@ function getTransporterProblems(config: TransporterConfig): string[] {
         return problems
     }
 
-    if (config.type === TransporterType.Midi) {
-        if (!midiAccess) {
-            problems.push('No MIDI access')
-            return problems
-        }
+    // if (config.type === TransporterType.Midi) {
+    //     if (!midiAccess) {
+    //         problems.push('No MIDI access')
+    //         return problems
+    //     }
 
-        const { midi } = config
+    //     const { midi } = config
 
-        if (!midi) {
-            problems.push('No MIDI config')
-            return problems
-        }
+    //     if (!midi) {
+    //         problems.push('No MIDI config')
+    //         return problems
+    //     }
 
-        problems.push(...getDuplexMidiProblems('Transporter', midi))
-    }
+    //     problems.push(...getDuplexMidiProblems('Transporter', midi))
+    // }
 
     return problems
 }
@@ -126,21 +124,21 @@ function getControllerProblems(partName: PartName, config: ControllerConfig): st
         return problems
     }
 
-    if (config.type === ControllerType.Midi) {
-        if (!midiAccess) {
-            problems.push('No MIDI access')
-            return problems
-        }
+    // if (config.type === ControllerType.Midi) {
+    //     if (!midiAccess) {
+    //         problems.push('No MIDI access')
+    //         return problems
+    //     }
 
-        const { midi } = config
+    //     const { midi } = config
 
-        if (!midi) {
-            problems.push('No MIDI config')
-            return problems
-        }
+    //     if (!midi) {
+    //         problems.push('No MIDI config')
+    //         return problems
+    //     }
 
-        problems.push(...getDuplexMidiProblems(`${partName} controller`, midi))
-    }
+    //     problems.push(...getDuplexMidiProblems(`${partName} controller`, midi))
+    // }
 
     return problems
 }

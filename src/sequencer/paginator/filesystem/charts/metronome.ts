@@ -1,9 +1,8 @@
-import { PitchNumber, Chart, BufferEvent, BufferEventType, } from '../../../../types.ts'
+import { Milliseconds, PitchNumber, Chart, BufferEvent, BufferEventType, } from '../../../../types.ts'
 import Part from '../../../playbacker/band/part/part.ts'
 import { convertBpmToMpb, } from '../helper.ts'
 
 type Bpm = number
-type Milliseconds = number
 
 //---------------------Constants---------------------
 const minTempo: Bpm = 60

@@ -1,23 +1,27 @@
-import { PitchNumber, BufferFinishEvent, BufferEventType, BufferEvent, BufferNoteOnEvent, BufferNoteOffEvent, BufferComputeEvent, } from '../../../types.ts'
+import {
+    BufferEvent,
+    PitchNumber,
+    Milliseconds,
+    BufferFinishEvent,
+    BufferEventType,
+    BufferNoteOnEvent,
+    BufferNoteOffEvent,
+    BufferComputeEvent,
+} from '../../../types.ts'
 import Part from '../../playbacker/band/part/part.ts'
 
 export function insertEventsIntoBufferSorted(buffer: BufferEvent[], ...events: BufferEvent[]): BufferEvent[] {
     return [...buffer, ...events].sort((a, b) => a.time - b.time)
 }
 
-export type Milliseconds = number
-export type SwingAmount = number
-export type Beats = number
-export type BeatsIntoSong = Beats
-
 export type PitchLetters = 'C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B'
-const pitchLetterPattern = /[CDEFGAB]/
+export const pitchLetterPattern = /[CDEFGAB]/
 export type Accidental = '' | '♮' | 'b' | 'bb' | '#' | '##'
-const accidentalPattern = /♮|b{1,2}|#{1,2}/
+export const accidentalPattern = /♮|b{1,2}|#{1,2}/
 export type Octave = -2 | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-const octavePattern = /-?[0-8]/
+export const octavePattern = /-?[0-8]/
 export type PitchClass = `${PitchLetters}${Accidental}`
-const pitchClassPattern = /[CDEFGAB](♮|b{1,2}|#{1,2})?/
+export const pitchClassPattern = /[CDEFGAB](♮|b{1,2}|#{1,2})?/
 export type SpecificPitch = `${PitchClass}${Octave}`
 
 export function convertSpecificPitchToMidiNumber(specificPitch: SpecificPitch): PitchNumber {
@@ -82,13 +86,9 @@ export function convertBpmToMpb(bpm: number): number {
     return 60000 / bpm
 }
 
-// export function sitOut(...parts: Part[]): BufferFinishEvent[] {
-//     return parts.map((part): BufferFinishEvent => ({
-//         time: -Infinity,
-//         type: BufferEventType.Finish,
-//         part,
-//     }))
-// }
+export type SwingAmount = number
+export type Beats = number
+export type BeatsIntoSong = Beats
 
 type PipeState = {
     millisecondsPerBeat: Milliseconds

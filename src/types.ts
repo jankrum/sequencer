@@ -2,10 +2,10 @@ import Part from './sequencer/playbacker/band/part/part.ts'
 
 export type PartName = 'bass' | 'drum' | 'keys' | 'lead'
 
-export type DuplexMidiConfig = {
-    input: string,
-    output: string,
-}
+// export type DuplexMidiConfig = {
+//     input: string,
+//     output: string,
+// }
 
 export type OneIndexedMidiChannel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16
 
@@ -18,48 +18,48 @@ export type SimplexMidiConfig = {
 export enum TransporterType {
     Dom,
     Midi,
-    // WebRTC,
+    // Webrtc,
 }
 
 export type DomTransporterConfig = {
     type: TransporterType.Dom,
 }
 
-export type MidiTransporterConfig = {
-    type: TransporterType.Midi,
-    midi: DuplexMidiConfig,
-}
+// export type MidiTransporterConfig = {
+//     type: TransporterType.Midi,
+//     midi: DuplexMidiConfig,
+// }
 
 // export type WebrtcTransporterConfig = {
-//     type: TransporterType.WebRTC,
+//     type: TransporterType.Webrtc,
 //     room: string,
 // }
 
-export type TransporterConfig = DomTransporterConfig | MidiTransporterConfig // | WebrtcTransporterConfig
+export type TransporterConfig = DomTransporterConfig // | MidiTransporterConfig | WebrtcTransporterConfig
 //#endregion
 
 //#region Controller Config
 export enum ControllerType {
     Dom,
     Midi,
-    // WebRTC,
+    // Webrtc,
 }
 
 export type DomControllerConfig = {
     type: ControllerType.Dom,
 }
 
-export type MidiControllerConfig = {
-    type: ControllerType.Midi,
-    midi: DuplexMidiConfig,
-}
+// export type MidiControllerConfig = {
+//     type: ControllerType.Midi,
+//     midi: DuplexMidiConfig,
+// }
 
 // export type WebrtcControllerConfig = {
 //     type: ControllerType.Webrtc,
 //     room: string,
 // }
 
-export type ControllerConfig = DomControllerConfig | MidiControllerConfig // | WebrtcControllerConfig
+export type ControllerConfig = DomControllerConfig // | MidiControllerConfig | WebrtcControllerConfig
 //#endregion
 
 //#region Synthesizer Config
@@ -83,7 +83,7 @@ export type MidiSynthesizerConfig = {
     midi: SimplexMidiConfig,
 }
 
-// export const enum ToneSourceType {
+// export enum ToneSourceType {
 //     Chiptune,
 //     Sampler,
 //     Synth,
@@ -95,7 +95,7 @@ export type MidiSynthesizerConfig = {
 
 // export type SamplerToneSourceConfig = {
 //     type: ToneSourceType.Sampler,
-//     source: string,
+//     sampleName: string,
 // }
 
 // export type SynthToneSourceConfig = {
@@ -129,13 +129,13 @@ export type Config = {
 //#endregion
 
 //#region Playback
-export const enum PlaybackState {
+export enum PlaybackState {
     Playing,
     Paused,
     Stopped,
 }
 
-export const enum PlaybackAction {
+export enum PlaybackAction {
     Play,
     Pause,
     Resume,
@@ -148,15 +148,16 @@ export type Parts = {
     [key in PartName]: Part
 }
 
-export const enum BufferEventType {
+export type Milliseconds = number
+export type MillisecondsIntoSong = Milliseconds
+export type PitchNumber = number
+
+export enum BufferEventType {
     Finish,
     NoteOn,
     NoteOff,
     Compute,
 }
-
-export type MillisecondsIntoSong = number
-export type PitchNumber = number
 
 export type BufferFinishEvent = {
     time: MillisecondsIntoSong

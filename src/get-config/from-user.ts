@@ -5,8 +5,8 @@ import midiAccess from '../midi-access.ts'
 import getProblems from './get-problems.ts'
 
 // The types of transporters, controllers, and synthesizers
-const transporterTypes: [string, TransporterType][] = [['DOM', TransporterType.Dom], ['MIDI', TransporterType.Midi]]
-const controllerTypes: [string, ControllerType][] = [['DOM', ControllerType.Dom], ['MIDI', ControllerType.Midi]]
+const transporterTypes: [string, TransporterType][] = [['DOM', TransporterType.Dom], /*['MIDI', TransporterType.Midi]*/]
+const controllerTypes: [string, ControllerType][] = [['DOM', ControllerType.Dom], /*['MIDI', ControllerType.Midi]*/]
 const synthesizerTypes: [string, SynthesizerType][] = [['DOM', SynthesizerType.Dom], ['MIDI', SynthesizerType.Midi]]
 
 
@@ -16,12 +16,12 @@ const SELECTORS = {
     PART_CONFIG_CLASS: 'part-config',
     TYPE_DIV_CLASS: 'type-div',
     MIDI_DIV_CLASS: 'midi-div',
-    MIDI_INPUT_SELECT_CLASS: 'midi-input-select',
+    // MIDI_INPUT_SELECT_CLASS: 'midi-input-select',
     MIDI_OUTPUT_SELECT_CLASS: 'midi-output-select',
     REMEMBER_CHECKBOX_ID: 'remember-config',
 }
 
-type SpecificConfig = DuplexMidiConfigElement | SimplexMidiConfigElement
+type SpecificConfig = /*DuplexMidiConfigElement |*/ SimplexMidiConfigElement
 
 type AllTypes = TransporterType | ControllerType | SynthesizerType
 
@@ -51,11 +51,11 @@ function setUpRadioButtons(typeConfig: TypeConfigElement, typeSpecificNamesAndCo
 class TypeConfigElement {
     name: string
     title: string
-    typeNamesAndEnums: [string, TransporterType | ControllerType | SynthesizerType][]
+    typeNamesAndEnums: [string, AllTypes][]
     inputs: { [key: string]: HTMLInputElement }
     div: HTMLElement | null
 
-    constructor(name: string, title: string, typeNamesAndEnums: [string, TransporterType | ControllerType | SynthesizerType][]) {
+    constructor(name: string, title: string, typeNamesAndEnums: [string, AllTypes][]) {
         // Used in render
         this.name = name
         this.title = title
@@ -68,7 +68,7 @@ class TypeConfigElement {
 
     render() {
         // The inputs and labels for the types
-        const inputsAndLabels = this.typeNamesAndEnums.map(([typeName, typeEnum]: [string, TransporterType | ControllerType | SynthesizerType]) => {
+        const inputsAndLabels = this.typeNamesAndEnums.map(([typeName, typeEnum]: [string, AllTypes]) => {
             const inputId = `${this.name}-${typeName}`
             const input = dm('input', { id: inputId, type: 'radio', name: this.name, value: typeEnum }) as HTMLInputElement
             const label = dm('label', { for: inputId }, typeName)
@@ -81,7 +81,7 @@ class TypeConfigElement {
         return div
     }
 
-    getConfig(): TransporterType | ControllerType | SynthesizerType {
+    getConfig(): AllTypes {
         if (!this.div) {
             throw new Error('getConfig called before render')
         }
@@ -90,30 +90,30 @@ class TypeConfigElement {
     }
 }
 
-class DuplexMidiConfigElement {
-    inputSelect: HTMLSelectElement | null = null
-    outputSelect: HTMLSelectElement | null = null
-    div: HTMLElement | null = null
+// class DuplexMidiConfigElement {
+//     inputSelect: HTMLSelectElement | null = null
+//     outputSelect: HTMLSelectElement | null = null
+//     div: HTMLElement | null = null
 
-    render() {
-        const inputSelect = this.inputSelect = dm('select', { class: SELECTORS.MIDI_INPUT_SELECT_CLASS }) as HTMLSelectElement
-        const outputSelect = this.outputSelect = dm('select', { class: SELECTORS.MIDI_OUTPUT_SELECT_CLASS }) as HTMLSelectElement
-        const div = this.div = dm('div', {}, inputSelect, ' → Here → ', outputSelect)
+//     render() {
+//         const inputSelect = this.inputSelect = dm('select', { class: SELECTORS.MIDI_INPUT_SELECT_CLASS }) as HTMLSelectElement
+//         const outputSelect = this.outputSelect = dm('select', { class: SELECTORS.MIDI_OUTPUT_SELECT_CLASS }) as HTMLSelectElement
+//         const div = this.div = dm('div', {}, inputSelect, ' → Here → ', outputSelect)
 
-        return div
-    }
+//         return div
+//     }
 
-    getConfig() {
-        if (!this.inputSelect || !this.outputSelect) {
-            throw new Error('getConfig called before render')
-        }
+//     getConfig() {
+//         if (!this.inputSelect || !this.outputSelect) {
+//             throw new Error('getConfig called before render')
+//         }
 
-        return {
-            input: this.inputSelect.value,
-            output: this.outputSelect.value,
-        }
-    }
-}
+//         return {
+//             input: this.inputSelect.value,
+//             output: this.outputSelect.value,
+//         }
+//     }
+// }
 
 class SimplexMidiConfigElement {
     select: HTMLSelectElement | null = null
@@ -142,29 +142,29 @@ class SimplexMidiConfigElement {
 
 class TransporterConfigElement {
     typeConfig: TypeConfigElement = new TypeConfigElement('transporter-type', 'Type: ', transporterTypes)
-    midiConfig: DuplexMidiConfigElement = new DuplexMidiConfigElement()
+    // midiConfig: DuplexMidiConfigElement = new DuplexMidiConfigElement()
 
     render() {
         const legend = dm('legend', {}, 'TRANSPORTER')
         const typeDiv = this.typeConfig.render()
-        const midiDiv = this.midiConfig.render()
-        const fieldset = dm('fieldset', { id: SELECTORS.TRANSPORTER_CONFIG_ID }, legend, typeDiv, midiDiv)
+        // const midiDiv = this.midiConfig.render()
+        const fieldset = dm('fieldset', { id: SELECTORS.TRANSPORTER_CONFIG_ID }, legend, typeDiv, /*midiDiv*/)
 
         return fieldset
     }
 
     setUp() {
-        setUpRadioButtons(this.typeConfig, [[TransporterType.Midi, this.midiConfig]])
+        // setUpRadioButtons(this.typeConfig, [[TransporterType.Midi, this.midiConfig]])
     }
 
     getConfig(): TransporterConfig {
         const config = {} as any
 
-        const type = config.type = this.typeConfig.getConfig()
+        /*const type =*/ config.type = this.typeConfig.getConfig()
 
-        if (type === TransporterType.Midi) {
-            config.midi = this.midiConfig.getConfig()
-        }
+        // if (type === TransporterType.Midi) {
+        //     config.midi = this.midiConfig.getConfig()
+        // }
 
         return config
     }
@@ -172,7 +172,7 @@ class TransporterConfigElement {
 
 class ControllerConfigElement {
     typeConfig: TypeConfigElement
-    midiConfig: DuplexMidiConfigElement = new DuplexMidiConfigElement()
+    // midiConfig: DuplexMidiConfigElement = new DuplexMidiConfigElement()
     div: HTMLElement | null = null
 
     constructor(name: PartName) {
@@ -181,24 +181,24 @@ class ControllerConfigElement {
 
     render() {
         const typeDiv = this.typeConfig.render()
-        const midiConfig = this.midiConfig.render()
-        const div = this.div = dm('div', {}, typeDiv, midiConfig)
+        // const midiConfig = this.midiConfig.render()
+        const div = this.div = dm('div', {}, typeDiv, /*midiConfig*/)
 
         return div
     }
 
     setUp() {
-        setUpRadioButtons(this.typeConfig, [[ControllerType.Midi, this.midiConfig]])
+        // setUpRadioButtons(this.typeConfig, [[ControllerType.Midi, this.midiConfig]])
     }
 
     getConfig() {
         const config = {} as any
 
-        const type = config.type = this.typeConfig.getConfig()
+        /*const type =*/ config.type = this.typeConfig.getConfig()
 
-        if (type === ControllerType.Midi) {
-            config.midi = this.midiConfig.getConfig()
-        }
+        // if (type === ControllerType.Midi) {
+        //     config.midi = this.midiConfig.getConfig()
+        // }
 
         return config
     }
@@ -298,16 +298,16 @@ class ProblemDiv {
 
 class MiscellaneousDiv {
     refreshButton: HTMLButtonElement | null = null
-    rememberCheckbox: HTMLInputElement | null = null
+    // rememberCheckbox: HTMLInputElement | null = null
     problemDiv = new ProblemDiv()
 
     render() {
         const refreshButton = this.refreshButton = dm('button', { type: 'button' }, 'Refresh MIDI Ports') as HTMLButtonElement
-        const rememberCheckbox = this.rememberCheckbox = dm('input', { type: 'checkbox', id: SELECTORS.REMEMBER_CHECKBOX_ID }) as HTMLInputElement
+        // const rememberCheckbox = this.rememberCheckbox = dm('input', { type: 'checkbox', id: SELECTORS.REMEMBER_CHECKBOX_ID }) as HTMLInputElement
         const rememberLabel = dm('label', { for: SELECTORS.REMEMBER_CHECKBOX_ID }, 'Remember')
         const submitButton = dm('button', { type: 'submit' }, 'Submit')
         const problemDiv = this.problemDiv.render()
-        const div = dm('div', {}, refreshButton, rememberCheckbox, rememberLabel, submitButton, problemDiv)
+        const div = dm('div', {}, refreshButton, /*rememberCheckbox,*/ rememberLabel, submitButton, problemDiv)
 
         return div
     }
@@ -423,7 +423,7 @@ class ConfigFormElement {
         }
 
         // Populate the MIDI selects
-        populateMidiSelects(SELECTORS.MIDI_INPUT_SELECT_CLASS, 'inputs')
+        // populateMidiSelects(SELECTORS.MIDI_INPUT_SELECT_CLASS, 'inputs')
         populateMidiSelects(SELECTORS.MIDI_OUTPUT_SELECT_CLASS, 'outputs')
     }
 
