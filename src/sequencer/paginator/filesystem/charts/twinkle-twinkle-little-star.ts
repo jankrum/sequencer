@@ -1,10 +1,10 @@
-import { PipeOperation, SpecificPitch, Beats, BeatsIntoSong, convertSpecificPitchToMidiNumber, play, pipe, finish, setTempo, } from '../helper.ts'
-import Part from '../../../playbacker/band/part/part.ts'
-import { Chart, BufferEvent, } from '../../../../types.ts'
+import { Beats, BeatsIntoSong, Bpm, convertBpmToMpb, SpecificPitch, tastefullyShortenDuration, convertSpecificPitchToMidiNumber, computeScheduleAheadTime, Dynamics } from '../helper.ts'
+import { BufferEvent, Chart, PitchNumber, MillisecondsIntoSong, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent } from '../../../../types.ts'
 
-type Note = [SpecificPitch, BeatsIntoSong, Beats]
-
-const pitchesPositionsAndDurations: Note[] = [
+// The easy to work with information for the song
+const tempo: Bpm = 120
+type EasyNote = [SpecificPitch, BeatsIntoSong, Beats]
+const easyNotes: EasyNote[] = [
     ['C4', 0, 0.9],
     ['C4', 1, 0.9],
     ['G4', 2, 0.9],
@@ -48,27 +48,54 @@ const pitchesPositionsAndDurations: Note[] = [
     ['D4', 45, 0.9],
     ['C4', 46, 2],
 ]
+const velocity = Dynamics.mf
 
-function playTTLS(lead: Part): PipeOperation[] {
-    const octaveJumpControl = lead.controller.getRangeControl('8va chance: ', 0, 100, '%')
+// We can process this upfront because it is a constant
+const mpb = convertBpmToMpb(tempo)
+type FastNote = [PitchNumber, MillisecondsIntoSong, MillisecondsIntoSong]
+const fastNotes = easyNotes.map(([specificPitch, beatsIntoSong, beatDuration]): FastNote => {
+    const pitchNumber = convertSpecificPitchToMidiNumber(specificPitch)
+    const startTime = beatsIntoSong * mpb
+    const endTime = (beatsIntoSong + tastefullyShortenDuration(beatDuration)) * mpb
 
-    return pitchesPositionsAndDurations.map(([pitchName, position, duration]) => {
-        const roll = Math.random() * 100
-        const midiPitch = convertSpecificPitchToMidiNumber(pitchName)
-        const pitchFunction = (): number => octaveJumpControl.value > roll ? midiPitch + 12 : midiPitch
-
-        return play(lead, pitchFunction, position, duration, 0x7F)
-    })
-}
+    return [pitchNumber, startTime, endTime]
+})
 
 const chart: Chart = {
     title: 'Twinkle Twinkle Little Star',
-    compose: ({ bass, drum, keys, lead }): BufferEvent[] => pipe(
-        finish(bass, drum, keys),
-        setTempo(120),
-        ...playTTLS(lead),
-        finish(lead),
-    ),
+    compose: ({ lead }): BufferEvent[] => {
+        // Do this every time you compose
+        const octaveJumpControl = lead.controller.getRangeControl('8va chance: ', 0, 100, '%')
+
+        // Converts the fast to work with information to the compute buffer events
+        return fastNotes.map(([pitchNumber, startTime, endTime]): BufferEvent => {
+            return {
+                time: startTime - computeScheduleAheadTime,
+                type: BufferEventType.Compute,
+                callback: (buffer: BufferEvent[]): void => {
+                    const shouldJump = octaveJumpControl.value > (Math.random() * 100)
+                    const pitch = shouldJump ? pitchNumber + 12 : pitchNumber
+
+                    const noteOnEvent: BufferNoteOnEvent = {
+                        time: startTime,
+                        type: BufferEventType.NoteOn,
+                        part: lead,
+                        pitch,
+                        velocity,
+                    }
+
+                    const noteOffEvent: BufferNoteOffEvent = {
+                        time: endTime,
+                        type: BufferEventType.NoteOff,
+                        part: lead,
+                        pitch,
+                    }
+
+                    buffer.unshift(noteOnEvent, noteOffEvent)
+                }
+            }
+        })
+    },
 }
 
 export default chart

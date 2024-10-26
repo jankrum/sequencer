@@ -153,16 +153,9 @@ export type MillisecondsIntoSong = Milliseconds
 export type PitchNumber = number
 
 export enum BufferEventType {
-    Finish,
+    Compute,
     NoteOn,
     NoteOff,
-    Compute,
-}
-
-export type BufferFinishEvent = {
-    time: MillisecondsIntoSong
-    type: BufferEventType.Finish
-    part: Part
 }
 
 export type BufferNoteOnEvent = {
@@ -186,7 +179,7 @@ export type BufferComputeEvent = {
     callback: (buffer: BufferEvent[]) => void
 }
 
-export type BufferEvent = BufferFinishEvent | BufferNoteOnEvent | BufferNoteOffEvent | BufferComputeEvent
+export type BufferEvent = BufferComputeEvent | BufferNoteOnEvent | BufferNoteOffEvent
 
 export type Chart = {
     title: string,

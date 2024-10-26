@@ -1,6 +1,6 @@
 import Playbacker from '../../playbacker/playbacker.ts'
 import { PartsConfig, Chart, BufferEvent, BufferEventType } from '../../../types.ts'
-import Part, { makeParts } from './part/part.ts'
+import { makeParts } from './part/part.ts'
 import dm from '../../../dm.ts'
 
 const windowLength = 100
@@ -29,7 +29,6 @@ export default class Band {
     #loadBuffer: () => void = () => { }
     #startTime = 0
     #durationIntoSong = 0
-    #partsThatAreFinished = new Set<Part>()
 
     constructor(playbacker: Playbacker, config: PartsConfig) {
         this.#playbacker = playbacker
@@ -46,13 +45,6 @@ export default class Band {
 
             if (event) {
                 switch (event.type) {
-                    case BufferEventType.Finish:
-                        this.#partsThatAreFinished.add(event.part)
-                        if (this.#partsThatAreFinished.size === 4) {
-                            // Will propagate back to the band
-                            this.#playbacker.stop()
-                        }
-                        break
                     case BufferEventType.NoteOn:
                         event.part.synthesizer.noteOn(event.pitch, event.velocity, eventTime)
                         break
@@ -70,6 +62,7 @@ export default class Band {
 
     get #nextEventTime(): number {
         if (this.#buffer.length === 0) {
+            this.#playbacker.stop()
             return Infinity
         }
 
@@ -131,7 +124,6 @@ export default class Band {
         this.#worker.postMessage(WorkerMessageType.Stop)
 
         this.#durationIntoSong = 0
-        this.#partsThatAreFinished.clear()
         this.#loadBuffer()
 
         const allNotesOff = () => {
