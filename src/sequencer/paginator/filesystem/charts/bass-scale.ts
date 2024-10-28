@@ -1,5 +1,5 @@
-import { Chart, BufferEvent, BufferNoteOnEvent, BufferEventType, BufferNoteOffEvent, PitchNumber, MillisecondsIntoSong, } from '../../../../types.ts'
-import { SpecificPitch, convertBpmToMpb, convertSpecificPitchToMidiNumber, tastefullyShortenDuration, Bpm, Dynamics, Beats, } from '../helper.ts'
+import { Chart, EventType, MillisecondsIntoSong, PitchNumber } from '../../../../types.ts'
+import { Beats, Bpm, Dynamics, SpecificPitch, convertBpmToMpb, convertSpecificPitchToMidiNumber, tastefullyShortenDuration, } from '../helper.ts'
 
 // Easy to work with
 const tempo: Bpm = 120
@@ -9,34 +9,34 @@ const lastNoteDuration: Beats = 2
 
 // Fast to work with
 const mpb = convertBpmToMpb(tempo)
-type FastNote = [PitchNumber, MillisecondsIntoSong, MillisecondsIntoSong]
-const fastMajorScale: FastNote[] = majorScale.map((specificPitch, index) => {
-    const pitchNumber = convertSpecificPitchToMidiNumber(specificPitch)
-    const startTime = index * mpb
-    const isLastNote = index === majorScale.length - 1
-    const duration = isLastNote ? lastNoteDuration : 1
-    const endTime = (index + tastefullyShortenDuration(duration)) * mpb
-
-    return [pitchNumber, startTime, endTime]
-})
+const pitchNumbers: PitchNumber[] = majorScale.map(convertSpecificPitchToMidiNumber)
 
 // Chart
 const chart: Chart = {
     title: 'Bass Scale',
-    compose: ({ bass }): BufferEvent[] => fastMajorScale.map(([pitch, startTime, endTime]): [BufferNoteOnEvent, BufferNoteOffEvent] => ([{
-        time: startTime,
-        type: BufferEventType.NoteOn,
-        part: bass,
-        pitch,
-        velocity,
-    },
-    {
-        time: endTime,
-        type: BufferEventType.NoteOff,
-        part: bass,
-        pitch,
-    }])).flat(),
+    compose: function* ({ bass }) {
+        for (const [index, pitchNumber] of pitchNumbers.entries()) {
+            const startTime: MillisecondsIntoSong = index * mpb
+            const isLastNote = index === majorScale.length - 1
+            const duration = isLastNote ? lastNoteDuration : 1
+            const endTime = (index + tastefullyShortenDuration(duration)) * mpb
 
+            yield {
+                time: startTime,
+                type: EventType.NoteOn,
+                part: bass,
+                pitch: pitchNumber,
+                velocity,
+            }
+
+            yield {
+                time: endTime,
+                type: EventType.NoteOff,
+                part: bass,
+                pitch: pitchNumber,
+            }
+        }
+    },
 }
 
 export default chart

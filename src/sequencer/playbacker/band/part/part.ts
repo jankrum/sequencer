@@ -1,8 +1,8 @@
 import Controller from './controller.ts'
 import Synthesizer from './synthesizer.ts'
 
-import { Parts, PartName, PartConfig, PartsConfig } from '../../../../types.ts'
 import dm from '../../../../dm.ts'
+import { PartConfig, PartName, Parts, PartsConfig } from '../../../../types.ts'
 
 //#region makeParts
 export default class Part {
@@ -17,11 +17,31 @@ export default class Part {
     }
 
     render(): HTMLDivElement | null {
-        const partTitle = dm('h2', {}, this.#name.toUpperCase()) as HTMLHeadingElement
         const controllerDiv = this.controller.render()
         const synthesizerDiv = this.synthesizer.render()
 
-        return controllerDiv || synthesizerDiv ? dm('div', { class: 'part' }, partTitle, controllerDiv, synthesizerDiv) as HTMLDivElement : null
+        if (!controllerDiv && !synthesizerDiv) {
+            return null
+        }
+
+        const heading = dm('h2', {}, this.#name.toUpperCase()) as HTMLHeadingElement
+        const div = dm('div', { class: 'part' }, heading, controllerDiv, synthesizerDiv) as HTMLDivElement
+
+        heading.addEventListener('click', () => {
+            console.log('click')
+
+            console.log(controllerDiv)
+
+            if (controllerDiv) {
+                controllerDiv.classList.toggle('hidden')
+            }
+
+            if (synthesizerDiv) {
+                synthesizerDiv.classList.toggle('hidden')
+            }
+        })
+
+        return div
     }
 }
 

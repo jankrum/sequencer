@@ -1,7 +1,7 @@
-import { BufferEvent, PitchNumber, Milliseconds, } from '../../../types.ts'
+import { Event, PitchNumber, Milliseconds, } from '../../../types.ts'
 
 // The most primitive helper function
-export function insertEventsIntoBufferSorted(buffer: BufferEvent[], ...events: BufferEvent[]): BufferEvent[] {
+export function insertEventsIntoBufferSorted(buffer: Event[], ...events: Event[]): Event[] {
     return [...buffer, ...events].sort((a, b) => a.time - b.time)
 }
 

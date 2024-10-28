@@ -7,7 +7,21 @@ Chopping block:
     - Pretty big undertaking
 - WebRTC integration
     - Gonna need to have a signaling server to handle the initial handshake, will also probably need a QR code library
-- Planned tempo changes, accelerando, ritardando 
-    - Maybe this isn't in buffer but in the compose func with callbacks and helper.ts
 - Writing more charts
     - 8 step sequencer, mack the knife, moondance, lonely rolling star, bass-line generator, in c
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+We start load a chart:
+    - Clear the controllers
+    - Load the event generator object
+
+We play a chart:
+    - We read the first event's time
+    - We compute a timeout from now to when the event should be handled
+    - We schedule a timeout to handle the event:
+        - If its a compute event, we don't do anything
+        - If its a note on event, we pass it to the part's synth
+        - If its a note off event, we pass it to the part's synth
+        - We read the next event
+            - If there are no more events, we don't do anything
+            - If there is another event, we compute a timeout from now to when the event should be handled

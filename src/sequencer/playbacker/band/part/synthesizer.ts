@@ -1,6 +1,7 @@
 import dm from '../../../../dm.ts'
-import { SynthesizerConfig, PartName, SynthesizerType, MidiSynthesizerConfig } from '../../../../types.ts'
 import midiAccess from '../../../../midi-access.ts'
+import { MidiSynthesizerConfig, PartName, SynthesizerConfig, SynthesizerType } from '../../../../types.ts'
+import { windowLength } from '../band.ts'
 
 //#region LogSynthesizer
 function makeIntoLogSynthesizer(synthesizer: Synthesizer): void {
@@ -37,11 +38,11 @@ function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
             synthesizer.currentlyPlayingPitches.push(pitch)
         }
 
-        addMessage(`noteOn ${pitch} ${velocity} ${time.toFixed(0)}`, 'note-on')
+        addMessage(`noteOn ${pitch} ${velocity} ${time.toFixed(0)}, scheduled at: ${window.performance.now().toFixed(0)}`, 'note-on')
     }
 
     synthesizer.noteOff = (pitch: number, time: number, removeFromCurrentlyPlaying: boolean = true): void => {
-        addMessage(`noteOff ${pitch} ${time.toFixed(0)}`, 'note-off')
+        addMessage(`noteOff ${pitch} ${time.toFixed(0)}, scheduled at: ${window.performance.now().toFixed(0)}`, 'note-off')
 
         if (removeFromCurrentlyPlaying) {
             synthesizer.currentlyPlayingPitches = synthesizer.currentlyPlayingPitches.filter(currentPitch => currentPitch !== pitch)
@@ -99,9 +100,11 @@ function makeIntoMidiSynthesizer(synthesizer: Synthesizer, config: MidiSynthesiz
     }
 
     synthesizer.allNotesOff = (): void => {
-        output.send([0xb0 + zeroIndexedChannel, 0x7b, 0x00])
+        setTimeout(() => {
+            output.send([0xb0 + zeroIndexedChannel, 0x7b, 0x00])
 
-        synthesizer.currentlyPlayingPitches = []
+            synthesizer.currentlyPlayingPitches = []
+        }, windowLength)
     }
 }
 //#endregion
@@ -148,7 +151,7 @@ export default class Synthesizer {
     pause(): void {
         const now = window.performance.now()
         for (const pitch of this.currentlyPlayingPitches) {
-            this.noteOff(pitch, now, false)
+            this.noteOff(pitch, now + windowLength, false)
         }
     }
 

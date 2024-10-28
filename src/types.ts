@@ -3,15 +3,15 @@ import Part from './sequencer/playbacker/band/part/part.ts'
 export type PartName = 'bass' | 'drum' | 'keys' | 'lead'
 
 // export type DuplexMidiConfig = {
-//     input: string,
-//     output: string,
+//     input: string
+//     output: string
 // }
 
 export type OneIndexedMidiChannel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16
 
 export type SimplexMidiConfig = {
-    output: string,
-    channel: OneIndexedMidiChannel,
+    output: string
+    channel: OneIndexedMidiChannel
 }
 
 //#region Transporter Config
@@ -22,17 +22,17 @@ export enum TransporterType {
 }
 
 export type DomTransporterConfig = {
-    type: TransporterType.Dom,
+    type: TransporterType.Dom
 }
 
 // export type MidiTransporterConfig = {
-//     type: TransporterType.Midi,
-//     midi: DuplexMidiConfig,
+//     type: TransporterType.Midi
+//     midi: DuplexMidiConfig
 // }
 
 // export type WebrtcTransporterConfig = {
-//     type: TransporterType.Webrtc,
-//     room: string,
+//     type: TransporterType.Webrtc
+//     room: string
 // }
 
 export type TransporterConfig = DomTransporterConfig // | MidiTransporterConfig | WebrtcTransporterConfig
@@ -46,17 +46,17 @@ export enum ControllerType {
 }
 
 export type DomControllerConfig = {
-    type: ControllerType.Dom,
+    type: ControllerType.Dom
 }
 
 // export type MidiControllerConfig = {
-//     type: ControllerType.Midi,
-//     midi: DuplexMidiConfig,
+//     type: ControllerType.Midi
+//     midi: DuplexMidiConfig
 // }
 
 // export type WebrtcControllerConfig = {
-//     type: ControllerType.Webrtc,
-//     room: string,
+//     type: ControllerType.Webrtc
+//     room: string
 // }
 
 export type ControllerConfig = DomControllerConfig // | MidiControllerConfig | WebrtcControllerConfig
@@ -71,16 +71,16 @@ export enum SynthesizerType {
 }
 
 export type LogSynthesizerConfig = {
-    type: SynthesizerType.Log,
+    type: SynthesizerType.Log
 }
 
 export type DomSynthesizerConfig = {
-    type: SynthesizerType.Dom,
+    type: SynthesizerType.Dom
 }
 
 export type MidiSynthesizerConfig = {
-    type: SynthesizerType.Midi,
-    midi: SimplexMidiConfig,
+    type: SynthesizerType.Midi
+    midi: SimplexMidiConfig
 }
 
 // export enum ToneSourceType {
@@ -90,23 +90,23 @@ export type MidiSynthesizerConfig = {
 // }
 
 // export type ChiptuneToneSourceConfig = {
-//     type: ToneSourceType.Chiptune,
+//     type: ToneSourceType.Chiptune
 // }
 
 // export type SamplerToneSourceConfig = {
-//     type: ToneSourceType.Sampler,
-//     sampleName: string,
+//     type: ToneSourceType.Sampler
+//     sampleName: string
 // }
 
 // export type SynthToneSourceConfig = {
-//     type: ToneSourceType.Synth,
+//     type: ToneSourceType.Synth
 // }
 
 // export type ToneSourceConfig = ChiptuneToneSourceConfig | SamplerToneSourceConfig | SynthToneSourceConfig
 
 // export type ToneSynthesizerConfig = {
-//     type: SynthesizerType.Tone,
-//     source: ToneSourceConfig,
+//     type: SynthesizerType.Tone
+//     source: ToneSourceConfig
 // }
 
 export type SynthesizerConfig = LogSynthesizerConfig | DomSynthesizerConfig | MidiSynthesizerConfig // | ToneSynthesizerConfig
@@ -114,8 +114,8 @@ export type SynthesizerConfig = LogSynthesizerConfig | DomSynthesizerConfig | Mi
 
 //#region Config
 export type PartConfig = {
-    controller: ControllerConfig,
-    synthesizer: SynthesizerConfig,
+    controller: ControllerConfig
+    synthesizer: SynthesizerConfig
 }
 
 export type PartsConfig = {
@@ -123,8 +123,8 @@ export type PartsConfig = {
 }
 
 export type Config = {
-    transporter: TransporterConfig,
-    parts: PartsConfig,
+    transporter: TransporterConfig
+    parts: PartsConfig
 }
 //#endregion
 
@@ -152,37 +152,36 @@ export type Milliseconds = number
 export type MillisecondsIntoSong = Milliseconds
 export type PitchNumber = number
 
-export enum BufferEventType {
+export enum EventType {
     Compute,
     NoteOn,
     NoteOff,
 }
 
-export type BufferNoteOnEvent = {
+export type ComputeEvent = {
     time: MillisecondsIntoSong
-    type: BufferEventType.NoteOn
+    type: EventType.Compute
+}
+
+export type NoteOnEvent = {
+    time: MillisecondsIntoSong
+    type: EventType.NoteOn
     part: Part
     pitch: PitchNumber
     velocity: number
 }
 
-export type BufferNoteOffEvent = {
+export type NoteOffEvent = {
     time: MillisecondsIntoSong
-    type: BufferEventType.NoteOff
+    type: EventType.NoteOff
     part: Part
     pitch: PitchNumber
 }
 
-export type BufferComputeEvent = {
-    time: MillisecondsIntoSong
-    type: BufferEventType.Compute
-    callback: (buffer: BufferEvent[]) => void
-}
-
-export type BufferEvent = BufferComputeEvent | BufferNoteOnEvent | BufferNoteOffEvent
+export type Event = ComputeEvent | NoteOnEvent | NoteOffEvent
 
 export type Chart = {
-    title: string,
-    compose: (parts: Parts) => BufferEvent[],
+    title: string
+    compose: (parts: Parts) => Generator<Event>
 }
 //#endregion

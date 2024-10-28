@@ -1,5 +1,5 @@
-import { Beats, BeatsIntoSong, Bpm, convertBpmToMpb, SpecificPitch, tastefullyShortenDuration, convertSpecificPitchToMidiNumber, computeScheduleAheadTime, Dynamics } from '../helper.ts'
-import { BufferEvent, Chart, PitchNumber, MillisecondsIntoSong, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent } from '../../../../types.ts'
+import { Chart, EventType, MillisecondsIntoSong, PitchNumber } from '../../../../types.ts'
+import { Beats, BeatsIntoSong, Bpm, computeScheduleAheadTime, convertBpmToMpb, convertSpecificPitchToMidiNumber, Dynamics, SpecificPitch, tastefullyShortenDuration } from '../helper.ts'
 
 // The easy to work with information for the song
 const tempo: Bpm = 120
@@ -63,38 +63,34 @@ const fastNotes = easyNotes.map(([specificPitch, beatsIntoSong, beatDuration]): 
 
 const chart: Chart = {
     title: 'Twinkle Twinkle Little Star',
-    compose: ({ lead }): BufferEvent[] => {
+    compose: function* ({ lead }) {
         // Do this every time you compose
         const octaveJumpControl = lead.controller.getRangeControl('8va chance: ', 0, 100, '%')
 
-        // Converts the fast to work with information to the compute buffer events
-        return fastNotes.map(([pitchNumber, startTime, endTime]): BufferEvent => {
-            return {
+        for (const [pitchNumber, startTime, endTime] of fastNotes) {
+            yield {
                 time: startTime - computeScheduleAheadTime,
-                type: BufferEventType.Compute,
-                callback: (buffer: BufferEvent[]): void => {
-                    const shouldJump = octaveJumpControl.value > (Math.random() * 100)
-                    const pitch = shouldJump ? pitchNumber + 12 : pitchNumber
-
-                    const noteOnEvent: BufferNoteOnEvent = {
-                        time: startTime,
-                        type: BufferEventType.NoteOn,
-                        part: lead,
-                        pitch,
-                        velocity,
-                    }
-
-                    const noteOffEvent: BufferNoteOffEvent = {
-                        time: endTime,
-                        type: BufferEventType.NoteOff,
-                        part: lead,
-                        pitch,
-                    }
-
-                    buffer.unshift(noteOnEvent, noteOffEvent)
-                }
+                type: EventType.Compute,
             }
-        })
+
+            const shouldJump = octaveJumpControl.value > (Math.random() * 100)
+            const pitch = shouldJump ? pitchNumber + 12 : pitchNumber
+
+            yield {
+                time: startTime,
+                type: EventType.NoteOn,
+                part: lead,
+                pitch,
+                velocity,
+            }
+
+            yield {
+                time: endTime,
+                type: EventType.NoteOff,
+                part: lead,
+                pitch,
+            }
+        }
     },
 }
 

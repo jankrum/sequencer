@@ -10,5 +10,9 @@
         "singlefile",
         "TTLS",
         "Webrtc"
-    ]
+    ],
+    // put this in your settings object
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always",
+    },
 }

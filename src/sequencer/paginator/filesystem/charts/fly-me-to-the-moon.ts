@@ -1,8 +1,7 @@
 // https://musescore.com/user/34876540/scores/8425946
 
-import { Chart, BufferEvent, PitchNumber, Milliseconds, MillisecondsIntoSong, BufferEventType, BufferNoteOnEvent, BufferNoteOffEvent, } from '../../../../types.ts'
-import Part from '../../../playbacker/band/part/part.ts'
-import { SpecificPitch, BeatsIntoSong, Beats, PitchClass, convertSpecificPitchToMidiNumber, Bpm, Dynamics, insertEventsIntoBufferSorted, tastefullyShortenDuration, computeBeatTiming, convertBpmToMpb, } from '../helper.ts'
+import { Chart, EventType, Milliseconds, MillisecondsIntoSong, PartName, PitchNumber } from '../../../../types.ts'
+import { Beats, BeatsIntoSong, Bpm, Dynamics, PitchClass, SpecificPitch, computeBeatTiming, convertBpmToMpb, convertSpecificPitchToMidiNumber, tastefullyShortenDuration } from '../helper.ts'
 
 // Types
 type Note = [pitch: SpecificPitch, position: BeatsIntoSong, duration: Beats]
@@ -250,9 +249,9 @@ const lowestBassSpecificPitch = 'E1'
 
 // Fast to work with
 const mpb: Milliseconds = convertBpmToMpb(tempo)
-type FastNote = [PitchNumber, MillisecondsIntoSong, MillisecondsIntoSong]
-const bassPart: FastNote[] = (() => {
-    const notes: FastNote[] = []
+type NoteEvent = [partName: PartName, isNoteOn: boolean, pitch: PitchNumber, time: MillisecondsIntoSong]
+const bassNoteEvents: NoteEvent[] = (() => {
+    const noteEvents: NoteEvent[] = []
 
     const swingAmount = 0.2
     const swingDivision = 1
@@ -271,58 +270,70 @@ const bassPart: FastNote[] = (() => {
         const extensionNote = extension === '6' ? bassRoot + 9 : extension === '7' ? bassRoot + 10 : extension === 'maj7' ? bassRoot + 11 : extension === '7(b5)' ? bassRoot + 10 : bassRoot + 12
 
         if (duration === 4) {
-            notes.push(
-                [bassRoot, computeBeatTiming(position, mpb, swingAmount, swingDivision), computeBeatTiming(position + tastefullyShortenDuration(1), mpb, swingAmount, swingDivision)],
-                [third, computeBeatTiming(position + 1, mpb, swingAmount, swingDivision), computeBeatTiming(position + tastefullyShortenDuration(2), mpb, swingAmount, swingDivision)],
-                [fifth, computeBeatTiming(position + 2, mpb, swingAmount, swingDivision), computeBeatTiming(position + tastefullyShortenDuration(3), mpb, swingAmount, swingDivision)],
-                [extensionNote, computeBeatTiming(position + 3, mpb, swingAmount, swingDivision), computeBeatTiming(position + tastefullyShortenDuration(4), mpb, swingAmount, swingDivision)],
+            noteEvents.push(
+                ['bass', true, bassRoot, computeBeatTiming(position, mpb, swingAmount, swingDivision)],
+                ['bass', false, bassRoot, computeBeatTiming(position + tastefullyShortenDuration(1), mpb, swingAmount, swingDivision)],
+                ['bass', true, third, computeBeatTiming(position + 1, mpb, swingAmount, swingDivision)],
+                ['bass', false, third, computeBeatTiming(position + tastefullyShortenDuration(2), mpb, swingAmount, swingDivision)],
+                ['bass', true, fifth, computeBeatTiming(position + 2, mpb, swingAmount, swingDivision)],
+                ['bass', false, fifth, computeBeatTiming(position + tastefullyShortenDuration(3), mpb, swingAmount, swingDivision)],
+                ['bass', true, extensionNote, computeBeatTiming(position + 3, mpb, swingAmount, swingDivision)],
+                ['bass', false, extensionNote, computeBeatTiming(position + tastefullyShortenDuration(4), mpb, swingAmount, swingDivision)],
+
             )
         } else if (duration === 2) {
-            notes.push(
-                [bassRoot, computeBeatTiming(position, mpb, swingAmount, swingDivision), computeBeatTiming(position + tastefullyShortenDuration(1), mpb, swingAmount, swingDivision)],
-                [fifth, computeBeatTiming(position + 1, mpb, swingAmount, swingDivision), computeBeatTiming(position + tastefullyShortenDuration(2), mpb, swingAmount, swingDivision)],
+            noteEvents.push(
+                ['bass', true, bassRoot, computeBeatTiming(position, mpb, swingAmount, swingDivision)],
+                ['bass', false, bassRoot, computeBeatTiming(position + tastefullyShortenDuration(1), mpb, swingAmount, swingDivision)],
+                ['bass', true, fifth, computeBeatTiming(position + 1, mpb, swingAmount, swingDivision)],
+                ['bass', false, fifth, computeBeatTiming(position + tastefullyShortenDuration(2), mpb, swingAmount, swingDivision)],
             )
         } else {
             for (let i = 0; i < duration; i += 1) {
-                notes.push(
-                    [i % 2 === 0 ? bassRoot : fifth, computeBeatTiming(position + i, mpb, swingAmount, swingDivision), computeBeatTiming(position + i + tastefullyShortenDuration(1), mpb, swingAmount, swingDivision)],
+                noteEvents.push(
+                    ['bass', true, i % 2 === 0 ? bassRoot : fifth, computeBeatTiming(position + i, mpb, swingAmount, swingDivision)],
+                    ['bass', false, i % 2 === 0 ? bassRoot : fifth, computeBeatTiming(position + i + tastefullyShortenDuration(1), mpb, swingAmount, swingDivision)],
                 )
             }
         }
     }
 
-    return notes
+    return noteEvents
 })()
 
-const leadPart: FastNote[] = (() => song.melody.map(([specificPitch, position, duration]) => {
-    const pitch = convertSpecificPitchToMidiNumber(specificPitch)
+const leadNoteEvents: NoteEvent[] = (() => {
+    const noteEvents: NoteEvent[] = []
+
     const swingAmount = 0.25
     const swingDivision = 1
-    const startTime = computeBeatTiming(position, mpb, swingAmount, swingDivision)
-    const endTime = computeBeatTiming(position + tastefullyShortenDuration(duration), mpb, swingAmount, swingDivision)
-    return [pitch, startTime, endTime]
-}))()
 
-function play(part: Part, notes: FastNote[]): BufferEvent[] {
-    return notes.map(([pitch, startTime, endTime]): [BufferNoteOnEvent, BufferNoteOffEvent] => ([
-        {
-            time: startTime,
-            type: BufferEventType.NoteOn,
-            part,
-            pitch,
-            velocity,
-        }, {
-            time: endTime,
-            type: BufferEventType.NoteOff,
-            part,
-            pitch,
-        }
-    ])).flat()
-}
+    for (const [specificPitch, position, duration] of song.melody) {
+        const pitch = convertSpecificPitchToMidiNumber(specificPitch)
+        const startTime = computeBeatTiming(position, mpb, swingAmount, swingDivision)
+        const endTime = computeBeatTiming(position + tastefullyShortenDuration(duration), mpb, swingAmount, swingDivision)
+        noteEvents.push(['lead', true, pitch, startTime], ['lead', false, pitch, endTime])
+    }
+
+    return noteEvents
+})()
+
+const noteEvents: NoteEvent[] = [...bassNoteEvents, ...leadNoteEvents].toSorted((a, b) => a[3] - b[3])
 
 const chart: Chart = {
     title: 'Fly Me to the Moon',
-    compose: ({ bass, lead }): BufferEvent[] => insertEventsIntoBufferSorted([], ...play(bass, bassPart), ...play(lead, leadPart)),
+    compose: function* ({ bass, lead }) {
+        for (const [partName, isNoteOn, pitch, time] of noteEvents) {
+            const event = {
+                time,
+                type: isNoteOn ? EventType.NoteOn : EventType.NoteOff,
+                part: partName === 'bass' ? bass : lead,
+                pitch,
+                velocity,
+            }
+
+            yield event
+        }
+    },
 }
 
 export default chart
