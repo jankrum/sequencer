@@ -304,10 +304,10 @@ class MiscellaneousDiv {
     render() {
         const refreshButton = this.refreshButton = dm('button', { type: 'button' }, 'Refresh MIDI Ports') as HTMLButtonElement
         // const rememberCheckbox = this.rememberCheckbox = dm('input', { type: 'checkbox', id: SELECTORS.REMEMBER_CHECKBOX_ID }) as HTMLInputElement
-        const rememberLabel = dm('label', { for: SELECTORS.REMEMBER_CHECKBOX_ID }, 'Remember')
+        // const rememberLabel = dm('label', { for: SELECTORS.REMEMBER_CHECKBOX_ID }, 'Remember')
         const submitButton = dm('button', { type: 'submit' }, 'Submit')
         const problemDiv = this.problemDiv.render()
-        const div = dm('div', {}, refreshButton, /*rememberCheckbox,*/ rememberLabel, submitButton, problemDiv)
+        const div = dm('div', {}, refreshButton, /*rememberCheckbox, rememberLabel,*/ submitButton, problemDiv)
 
         return div
     }
