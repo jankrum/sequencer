@@ -4,6 +4,7 @@ import { Bpm, convertBpmToMpb, Dynamics, triggerLength } from '../helper.ts'
 // Constants
 const minTempo: Bpm = 60
 const maxTempo: Bpm = 240  // Maximum tempo should technically be ~630 BPM
+const beatsPerBar = 4
 const highPitch: PitchNumber = 33  // Metronome click sample
 const lowPitch: PitchNumber = 32  // Metronome click sample
 const velocity: Dynamics = Dynamics.f
@@ -18,7 +19,8 @@ const chart: Chart = {
         let beatNumber = 0
 
         while (true) {
-            const pitch = beatNumber === 0 ? highPitch : lowPitch
+            const isFirstBeat = beatNumber % beatsPerBar === 0
+            const pitch = isFirstBeat ? highPitch : lowPitch
 
             yield {
                 time: position,
@@ -36,7 +38,7 @@ const chart: Chart = {
             }
 
             position += convertBpmToMpb(tempoControl.value)
-            beatNumber = (beatNumber + 1) % 4
+            beatNumber += 1
         }
     },
 }
