@@ -28,6 +28,7 @@ type Section = {
 // Easy to work with
 const tempo: Bpm = 118
 // const tempo: Bpm = 240
+const beatsPerBar = 4
 const song = (() => {
     const sections: { [key: string]: Section } = {
         '1-16': {
@@ -92,7 +93,7 @@ const song = (() => {
                 { root: 'G', quality: 'major', extension: '7', position: 8, duration: 4, },
                 { root: 'C', quality: 'major', extension: 'maj7', position: 12, duration: 2, },
                 { root: 'C', quality: 'major', extension: '7', position: 14, duration: 2, },
-                { root: 'F', quality: 'major', extension: '7', position: 16, duration: 4, },
+                { root: 'F', quality: 'major', extension: 'maj7', position: 16, duration: 4, },
                 { root: 'B', quality: 'minor', extension: '7(b5)', position: 20, duration: 4, },
                 { root: 'E', quality: 'minor', extension: '7', position: 24, duration: 4, },
                 { root: 'A', quality: 'minor', extension: '7', position: 28, duration: 2, },
@@ -251,6 +252,8 @@ const velocity = Dynamics.mf
 const mpb: Milliseconds = convertBpmToMpb(tempo)
 
 function* playBassPart(bass: Part): Generator<Event> {
+    const directionControl = bass.controller.getOptionControl('Direction: ', ['down', 'up'])
+
     const lowestBassSpecificPitch = 'E1'
     const lowestBassNote = convertSpecificPitchToMidiNumber(lowestBassSpecificPitch)
 
@@ -261,7 +264,12 @@ function* playBassPart(bass: Part): Generator<Event> {
         return pitch >= lowestBassNote ? pitch : bringIntoBassRange(pitch + 12)
     }
 
-    for (const { root, quality, extension, position, duration } of song.chords) {
+    yield {
+        time: -Infinity,
+        type: EventType.Compute
+    }
+
+    for (const [chordIndex, { root, quality, extension, position, duration }] of song.chords.entries()) {
         const rootNote = convertSpecificPitchToMidiNumber(`${root}1`)
         const bassRoot = bringIntoBassRange(rootNote)
         const third = quality === 'major' ? bassRoot + 4 : bassRoot + 3
@@ -271,7 +279,10 @@ function* playBassPart(bass: Part): Generator<Event> {
 
         if (duration === 4) {
             console.log('chord', root, quality, extension, position, duration)
-            for (const [index, pitch] of [bassRoot, third, fifth, extensionNote].entries()) {
+
+            const notes = directionControl.value ? [bassRoot, third, fifth, extensionNote] : [bassRoot + 12, extensionNote, fifth, third]
+
+            for (const [index, pitch] of notes.entries()) {
                 yield {
                     type: EventType.NoteOn,
                     time: computeBeatTiming(position + index, mpb, swingAmount, swingDivision),
@@ -289,7 +300,17 @@ function* playBassPart(bass: Part): Generator<Event> {
             }
         } else if (duration === 2) {
             console.log('chord', root, quality, extension, position, duration)
-            for (const [index, pitch] of [bassRoot, fifth].entries()) {
+
+            function isPaired(testChord: Chord): Boolean {
+                console.log('found a pair!')
+                return testChord.root === root && testChord.extension === extension
+            }
+
+            const isFirstPart = position % beatsPerBar === 0
+            const isPartOfPair = isPaired(song.chords[chordIndex + (isFirstPart ? 1 : -1)])
+            const bassRootTwoBeats = (directionControl.value ? 0 : 12) + bassRoot
+            const notes = isPartOfPair ? (isFirstPart ? [bassRootTwoBeats, bassRootTwoBeats] : [fifth, fifth]) : [bassRootTwoBeats, fifth]
+            for (const [index, pitch] of notes.entries()) {
                 yield {
                     type: EventType.NoteOn,
                     time: computeBeatTiming(position + index, mpb, swingAmount, swingDivision),
@@ -306,13 +327,14 @@ function* playBassPart(bass: Part): Generator<Event> {
                 }
             }
         } else {
+            const bassRootTwoBeats = (directionControl.value ? 0 : 12) + bassRoot
             console.log('chord', root, quality, extension, position, duration)
             for (let i = 0; i < duration; i += 1) {
                 yield {
                     type: EventType.NoteOn,
                     time: computeBeatTiming(position + i, mpb, swingAmount, swingDivision),
                     part: bass,
-                    pitch: i % 2 === 0 ? bassRoot : fifth,
+                    pitch: i % 2 === 0 ? bassRootTwoBeats : fifth,
                     velocity,
                 }
 
@@ -320,7 +342,7 @@ function* playBassPart(bass: Part): Generator<Event> {
                     type: EventType.NoteOff,
                     time: computeBeatTiming(position + i + tastefulQuarterNote, mpb, swingAmount, swingDivision),
                     part: bass,
-                    pitch: i % 2 === 0 ? bassRoot : fifth,
+                    pitch: i % 2 === 0 ? bassRootTwoBeats : fifth,
                 }
             }
         }
