@@ -1,5 +1,5 @@
 import { Chart, EventType, MillisecondsIntoSong, PitchNumber } from '../../../../types.ts'
-import { Beats, BeatsIntoSong, Bpm, computeScheduleAheadTime, convertBpmToMpb, convertSpecificPitchToMidiNumber, Dynamics, SpecificPitch, tastefullyShortenDuration } from '../helper.ts'
+import { Beats, BeatsIntoSong, Bpm, computeScheduleAheadTime, convertBpmToMpb, convertSpecificPitchToMidiNumber, Dynamics, SpecificPitch, tastefullyShortenDuration } from './scripts/helper.ts'
 
 // The easy to work with information for the song
 const tempo: Bpm = 120

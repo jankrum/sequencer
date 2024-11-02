@@ -1,5 +1,5 @@
 import { Chart, EventType, Milliseconds } from '../../../../types.ts'
-import { Dynamics } from '../helper.ts'
+import { Dynamics } from './scripts/helper.ts'
 
 // No magic numbers
 const pitch = 60

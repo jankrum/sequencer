@@ -1,34 +1,16 @@
 // https://musescore.com/user/34876540/scores/8425946
 
-import { Chart, Event, EventType, Milliseconds, PitchNumber } from '../../../../types.ts'
-import Part from '../../../playbacker/band/part/part.ts'
-import { Beats, BeatsIntoSong, Bpm, Dynamics, PitchClass, SpecificPitch, computeBeatTiming, convertBpmToMpb, convertSpecificPitchToMidiNumber, sortGenerators, tastefullyShortenDuration } from '../helper.ts'
-
-// Types
-type Note = [pitch: SpecificPitch, position: BeatsIntoSong, duration: Beats]
-
-type Quality = 'major' | 'minor' | 'diminished' | 'augmented'
-
-type Extension = '6' | '7' | 'maj7' | '7(b5)' | '9'
-
-type Chord = {
-    root: PitchClass,
-    quality: Quality,
-    extension?: Extension,
-    position: BeatsIntoSong,
-    duration: Beats,
-}
-
-type Section = {
-    length: Beats,
-    melody: Note[],
-    chords: Chord[],
-}
+import { Chart } from '../../../../types.ts'
+import dummyPlayer, { convertEasyToFast } from './scripts/dummy-player.ts'
+import { BeatsIntoSong, Bpm, Chord, Dynamics, Note, Section, mergeGenerators } from './scripts/helper.ts'
+import jazzBassist from './scripts/jazz-bassist.ts'
 
 // Easy to work with
 const tempo: Bpm = 118
 // const tempo: Bpm = 240
 const beatsPerBar = 4
+const swingAmount = 0.25
+const swingDivision = 1
 const song = (() => {
     const sections: { [key: string]: Section } = {
         '1-16': {
@@ -248,136 +230,13 @@ const song = (() => {
 })()
 const velocity = Dynamics.mf
 
-// Fast to work with
-const mpb: Milliseconds = convertBpmToMpb(tempo)
-
-function* playBassPart(bass: Part): Generator<Event> {
-    const directionControl = bass.controller.getOptionControl('Direction: ', ['down', 'up'])
-
-    const lowestBassSpecificPitch = 'E1'
-    const lowestBassNote = convertSpecificPitchToMidiNumber(lowestBassSpecificPitch)
-
-    const swingAmount = 0.2
-    const swingDivision = 1
-
-    function bringIntoBassRange(pitch: PitchNumber): PitchNumber {
-        return pitch >= lowestBassNote ? pitch : bringIntoBassRange(pitch + 12)
-    }
-
-    yield {
-        time: -Infinity,
-        type: EventType.Compute
-    }
-
-    for (const [chordIndex, { root, quality, extension, position, duration }] of song.chords.entries()) {
-        const rootNote = convertSpecificPitchToMidiNumber(`${root}1`)
-        const bassRoot = bringIntoBassRange(rootNote)
-        const third = quality === 'major' ? bassRoot + 4 : bassRoot + 3
-        const fifth = extension === '7(b5)' ? bassRoot + 6 : bassRoot + 7
-        const extensionNote = extension === '6' ? bassRoot + 9 : extension === '7' ? bassRoot + 10 : extension === 'maj7' ? bassRoot + 11 : extension === '7(b5)' ? bassRoot + 10 : bassRoot + 12
-        const tastefulQuarterNote = tastefullyShortenDuration(1)
-
-        if (duration === 4) {
-            console.log('chord', root, quality, extension, position, duration)
-
-            const notes = directionControl.value ? [bassRoot, third, fifth, extensionNote] : [bassRoot + 12, extensionNote, fifth, third]
-
-            for (const [index, pitch] of notes.entries()) {
-                yield {
-                    type: EventType.NoteOn,
-                    time: computeBeatTiming(position + index, mpb, swingAmount, swingDivision),
-                    part: bass,
-                    pitch,
-                    velocity,
-                }
-
-                yield {
-                    type: EventType.NoteOff,
-                    time: computeBeatTiming(position + index + tastefulQuarterNote, mpb, swingAmount, swingDivision),
-                    part: bass,
-                    pitch,
-                }
-            }
-        } else if (duration === 2) {
-            console.log('chord', root, quality, extension, position, duration)
-
-            function isPaired(testChord: Chord): Boolean {
-                console.log('found a pair!')
-                return testChord.root === root && testChord.extension === extension
-            }
-
-            const isFirstPart = position % beatsPerBar === 0
-            const isPartOfPair = isPaired(song.chords[chordIndex + (isFirstPart ? 1 : -1)])
-            const bassRootTwoBeats = (directionControl.value ? 0 : 12) + bassRoot
-            const notes = isPartOfPair ? (isFirstPart ? [bassRootTwoBeats, bassRootTwoBeats] : [fifth, fifth]) : [bassRootTwoBeats, fifth]
-            for (const [index, pitch] of notes.entries()) {
-                yield {
-                    type: EventType.NoteOn,
-                    time: computeBeatTiming(position + index, mpb, swingAmount, swingDivision),
-                    part: bass,
-                    pitch,
-                    velocity,
-                }
-
-                yield {
-                    type: EventType.NoteOff,
-                    time: computeBeatTiming(position + index + tastefulQuarterNote, mpb, swingAmount, swingDivision),
-                    part: bass,
-                    pitch,
-                }
-            }
-        } else {
-            const bassRootTwoBeats = (directionControl.value ? 0 : 12) + bassRoot
-            console.log('chord', root, quality, extension, position, duration)
-            for (let i = 0; i < duration; i += 1) {
-                yield {
-                    type: EventType.NoteOn,
-                    time: computeBeatTiming(position + i, mpb, swingAmount, swingDivision),
-                    part: bass,
-                    pitch: i % 2 === 0 ? bassRootTwoBeats : fifth,
-                    velocity,
-                }
-
-                yield {
-                    type: EventType.NoteOff,
-                    time: computeBeatTiming(position + i + tastefulQuarterNote, mpb, swingAmount, swingDivision),
-                    part: bass,
-                    pitch: i % 2 === 0 ? bassRootTwoBeats : fifth,
-                }
-            }
-        }
-    }
-}
-
-function* playLeadPart(lead: Part): Generator<Event> {
-    const swingAmount = 0.25
-    const swingDivision = 1
-
-    for (const [specificPitch, position, duration] of song.melody) {
-        const pitch = convertSpecificPitchToMidiNumber(specificPitch)
-        const startTime = computeBeatTiming(position, mpb, swingAmount, swingDivision)
-        const endTime = computeBeatTiming(position + tastefullyShortenDuration(duration), mpb, swingAmount, swingDivision)
-        yield {
-            type: EventType.NoteOn,
-            time: startTime,
-            part: lead,
-            pitch,
-            velocity,
-        }
-
-        yield {
-            type: EventType.NoteOff,
-            time: endTime,
-            part: lead,
-            pitch,
-        }
-    }
-}
-
 const chart: Chart = {
     title: 'Fly Me to the Moon',
     compose: function* ({ bass, lead }) {
-        for (const event of sortGenerators(playBassPart(bass), playLeadPart(lead))) {
+        const bassPlayer = jazzBassist(bass, tempo, beatsPerBar, swingAmount, swingDivision, song.chords, velocity)
+        const leadPlayer = dummyPlayer(lead, convertEasyToFast(tempo, swingAmount, swingDivision, song.melody, velocity))
+        const mergedGenerators = mergeGenerators(bassPlayer, leadPlayer)
+        for (const event of mergedGenerators) {
             yield event
         }
     },

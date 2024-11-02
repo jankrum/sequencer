@@ -1,8 +1,8 @@
-import { Event, Milliseconds, PitchNumber } from '../../../types.ts'
+import { Event, Milliseconds, PitchNumber } from '../../../../../types.ts'
 
-//#region SORTING
+//#region MERGING
 // The most useful helper functionality, useful whenever there are multiple parts
-export function* sortGenerators(...generators: Generator<Event>[]): Generator<Event> {
+export function* mergeGenerators(...generators: Generator<Event>[]): Generator<Event> {
     const currentValues = generators.map(generator => ({ generator, result: generator.next() })).filter(({ result }) => !result.done).map(({ generator, result }) => ({ generator, value: result.value }))
 
     // Sort initial values by time
@@ -170,4 +170,26 @@ export const computeScheduleAheadTime: Milliseconds = 100
 
 // The duration of a trigger signal
 export const triggerLength: Milliseconds = 5
+//#endregion
+
+//#region HARMONY
+export type Note = [pitch: SpecificPitch, position: BeatsIntoSong, duration: Beats]
+
+export type Quality = 'major' | 'minor' | 'diminished' | 'augmented'
+
+export type Extension = '6' | '7' | 'maj7' | '7(b5)' | '9'
+
+export type Chord = {
+    root: PitchClass,
+    quality: Quality,
+    extension?: Extension,
+    position: BeatsIntoSong,
+    duration: Beats,
+}
+
+export type Section = {
+    length: Beats,
+    melody: Note[],
+    chords: Chord[],
+}
 //#endregion

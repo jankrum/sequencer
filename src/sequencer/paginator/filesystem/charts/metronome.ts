@@ -1,5 +1,5 @@
 import { Chart, EventType, MillisecondsIntoSong, PitchNumber } from '../../../../types.ts'
-import { Bpm, convertBpmToMpb, Dynamics, triggerLength } from '../helper.ts'
+import { Bpm, convertBpmToMpb, Dynamics, triggerLength } from './scripts/helper.ts'
 
 // Constants
 const minTempo: Bpm = 60
