@@ -30,7 +30,6 @@ export default function* jazzBassist(bass: Part, tempo: Bpm, beatsPerBar: Beats,
             case 2:
                 const isFirstPart = chord.position % beatsPerBar === 0
                 const neighborChord = chords[index + (isFirstPart ? 1 : -1)]
-                console.log('checking neighbor chord', chord, neighborChord)
                 const isPartOfPair = neighborChord.root === chord.root && neighborChord.extension === chord.extension
                 return isPartOfPair ? (isFirstPart ? [rootOrOctave, rootOrOctave] : [fifth, fifth]) : [rootOrOctave, fifth]
             default:

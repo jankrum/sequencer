@@ -9,7 +9,7 @@ import jazzBassist from './scripts/jazz-bassist.ts'
 const tempo: Bpm = 118
 // const tempo: Bpm = 240
 const beatsPerBar = 4
-const swingAmount = 0.25
+const swingAmount = 0.3
 const swingDivision = 1
 const song = (() => {
     const sections: { [key: string]: Section } = {
