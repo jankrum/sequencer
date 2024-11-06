@@ -382,7 +382,7 @@ class ConfigFormElement {
         }
 
         // The radio buttons for the MIDI type
-        const midiTypeRadioButtons = Array.from(this.form.querySelectorAll('input[type="radio"][value="midi"]')) as HTMLInputElement[]
+        const midiTypeRadioButtons = Array.from(this.form.querySelectorAll('input[type="radio"][value="1"]')) as HTMLInputElement[]
 
         // Enable/disable the MIDI radio buttons
         for (const radioButton of midiTypeRadioButtons) {
