@@ -3,22 +3,6 @@ import midiAccess from '../../../../midi-access.ts'
 import { MidiSynthesizerConfig, PartName, SynthesizerConfig, SynthesizerType } from '../../../../types.ts'
 import { windowLength } from '../band.ts'
 
-//#region LogSynthesizer
-function makeIntoLogSynthesizer(synthesizer: Synthesizer): void {
-    synthesizer.noteOn = (pitch: number, time: number, velocity: number): void => {
-        console.log('noteOn', pitch, velocity, time)
-    }
-
-    synthesizer.noteOff = (pitch: number, time: number): void => {
-        console.log('noteOff', pitch, time)
-    }
-
-    synthesizer.allNotesOff = (): void => {
-        console.log('allNotesOff')
-    }
-}
-//#endregion
-
 //#region DomSynthesizer
 function makeIntoDomSynthesizer(synthesizer: Synthesizer): void {
     const title = dm('h2', { class: 'component-title' }, 'Synthesizer') as HTMLHeadingElement
@@ -125,9 +109,6 @@ export default class Synthesizer {
 
     constructor(_name: PartName, config: SynthesizerConfig) {
         switch (config.type) {
-            case SynthesizerType.Log:
-                makeIntoLogSynthesizer(this)
-                break
             case SynthesizerType.Dom:
                 makeIntoDomSynthesizer(this)
                 break
