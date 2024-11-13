@@ -4,6 +4,8 @@ import { Chart } from '../../../../types.ts'
 import dummyPlayer, { convertEasyToFast } from './scripts/dummy-player.ts'
 import { BeatsIntoSong, Bpm, Chord, Dynamics, Note, Section, mergeGenerators } from './scripts/helper.ts'
 import jazzBassist from './scripts/jazz-bassist.ts'
+import jazzDrummer from './scripts/jazz-drummer.ts'
+import jazzPianist from './scripts/jazz-pianist.ts'
 
 // Easy to work with
 const tempo: Bpm = 118
@@ -232,10 +234,12 @@ const velocity = Dynamics.mf
 
 const chart: Chart = {
     title: 'Fly Me to the Moon',
-    compose: function* ({ bass, lead }) {
+    compose: function* ({ bass, drum, keys, lead }) {
         const bassPlayer = jazzBassist(bass, tempo, beatsPerBar, swingAmount, swingDivision, song.chords, velocity)
+        const drumPlayer = jazzDrummer(drum, tempo, swingAmount, swingDivision, song.length, velocity)
+        const keysPlayer = jazzPianist(keys, tempo, swingAmount, swingDivision, song.chords, velocity)
         const leadPlayer = dummyPlayer(lead, convertEasyToFast(tempo, swingAmount, swingDivision, song.melody, velocity))
-        const mergedGenerators = mergeGenerators(bassPlayer, leadPlayer)
+        const mergedGenerators = mergeGenerators(bassPlayer, drumPlayer, keysPlayer, leadPlayer)
         for (const event of mergedGenerators) {
             yield event
         }
