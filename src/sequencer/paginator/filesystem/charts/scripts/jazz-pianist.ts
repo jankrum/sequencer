@@ -3,14 +3,17 @@ import Part from "../../../../playbacker/band/part/part"
 import { Beats, Bpm, Chord, computeBeatTiming, convertBpmToMpb, convertSpecificPitchToMidiNumber, Dynamics, SwingAmount, tastefullyShortenDuration } from "./helper"
 
 export default function* jazzPianist(keys: Part, tempo: Bpm, swingAmount: SwingAmount, swingDivision: Beats, chords: Chord[], velocity: Dynamics): Generator<Event> {
+    const lowestPosition = convertSpecificPitchToMidiNumber('C3')
+    const highestPosition = convertSpecificPitchToMidiNumber('C5')
+    const range = highestPosition - lowestPosition
+    const positionControl = keys.controller.getRangeControl('POS: ', 0, range)
+
     const mpb: Milliseconds = convertBpmToMpb(tempo)
 
-    const lowestPitch = 'A3'
-    const highestPitch = 'A4'
-    const lowestNote = convertSpecificPitchToMidiNumber(lowestPitch)
-    const highestNote = convertSpecificPitchToMidiNumber(highestPitch)
-
     function bringIntoRange(pitch: PitchNumber): PitchNumber {
+        const center = lowestPosition + positionControl.value
+        const lowestNote = center - 6
+        const highestNote = center + 6
         if (pitch < lowestNote) {
             return bringIntoRange(pitch + 12)
         } else if (pitch > highestNote) {
