@@ -79,7 +79,7 @@ const song = (() => {
                 { root: 'C', quality: 'major', extension: '7', position: 14, duration: 2, },
                 { root: 'F', quality: 'major', extension: 'maj7', position: 16, duration: 4, },
                 { root: 'B', quality: 'minor', extension: '7(b5)', position: 20, duration: 4, },
-                { root: 'E', quality: 'minor', extension: '7', position: 24, duration: 4, },
+                { root: 'E', quality: 'major', extension: '7', position: 24, duration: 4, },
                 { root: 'A', quality: 'minor', extension: '7', position: 28, duration: 2, },
                 { root: 'A', quality: 'major', extension: '7', position: 30, duration: 2, },
                 { root: 'D', quality: 'minor', extension: '7', position: 32, duration: 4, },
@@ -92,7 +92,7 @@ const song = (() => {
                 { root: 'F', quality: 'major', extension: '6', position: 56, duration: 2, },
                 { root: 'C', quality: 'major', extension: 'maj7', position: 58, duration: 2, },
                 { root: 'B', quality: 'minor', extension: '7(b5)', position: 60, duration: 2, },
-                { root: 'E', quality: 'minor', extension: '7', position: 62, duration: 2, },
+                { root: 'E', quality: 'major', extension: '7', position: 62, duration: 2, },
             ],
         },
         '17-26': {
@@ -147,7 +147,7 @@ const song = (() => {
                 { root: 'C', quality: 'major', extension: '7', position: 14, duration: 2, },
                 { root: 'F', quality: 'major', extension: 'maj7', position: 16, duration: 4, },
                 { root: 'B', quality: 'minor', extension: '7(b5)', position: 20, duration: 4, },
-                { root: 'E', quality: 'minor', extension: '7', position: 24, duration: 4, },
+                { root: 'E', quality: 'major', extension: '7', position: 24, duration: 4, },
                 { root: 'A', quality: 'minor', extension: '7', position: 28, duration: 2, },
                 { root: 'A', quality: 'major', extension: '7', position: 30, duration: 2, },
                 { root: 'D', quality: 'minor', extension: '7', position: 32, duration: 4, },
@@ -175,7 +175,7 @@ const song = (() => {
                 { root: 'G', quality: 'major', extension: '7', position: 12, duration: 4, },
                 { root: 'C', quality: 'major', extension: '6', position: 16, duration: 4, },
                 { root: 'B', quality: 'minor', extension: '7(b5)', position: 20, duration: 2, },
-                { root: 'E', quality: 'minor', extension: '7', position: 22, duration: 2, },
+                { root: 'E', quality: 'major', extension: '7', position: 22, duration: 2, },
             ],
         },
         '33-38': {
@@ -236,7 +236,7 @@ const chart: Chart = {
     title: 'Fly Me to the Moon',
     compose: function* ({ bass, drum, keys, lead }) {
         const bassPlayer = jazzBassist(bass, tempo, beatsPerBar, swingAmount, swingDivision, song.chords, velocity)
-        const drumPlayer = jazzDrummer(drum, tempo, swingAmount, swingDivision, song.length, velocity)
+        const drumPlayer = jazzDrummer(drum, tempo, 0.35, 1, song.length, velocity)
         const keysPlayer = jazzPianist(keys, tempo, swingAmount, swingDivision, song.chords, velocity)
         const leadPlayer = dummyPlayer(lead, convertEasyToFast(tempo, swingAmount, swingDivision, song.melody, velocity))
         const mergedGenerators = mergeGenerators(bassPlayer, drumPlayer, keysPlayer, leadPlayer)
