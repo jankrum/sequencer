@@ -1,5 +1,5 @@
-import Transporter from '../transporter.ts'
 import Playbacker from '../playbacker/playbacker.ts'
+import Transporter from '../transporter.ts'
 
 import setlist from './filesystem/setlist.ts'
 const setlistLength = setlist.length
@@ -31,10 +31,23 @@ export default class Paginator {
 
             transporter.changeChart(chartTitle, canPrevious, canNext)
             playbacker.changeChart(chart)
+
+            const urlParams = new URLSearchParams(window.location.search)
+            urlParams.set('page', this.#chartIndex.toString())
+            const newUrl = `${window.location.origin}${window.location.pathname}?${urlParams.toString()}`
+            window.history.replaceState(null, '', newUrl)
         }
     }
 
     start(): void {
+        const urlParams = new URLSearchParams(window.location.search)
+        const pageParam = urlParams.get('page')
+
+        const pageIndex = parseInt(pageParam || '0')
+        if (pageIndex >= 0 && pageIndex < setlistLength) {
+            this.#chartIndex = pageIndex
+        }
+
         this.#subscription()
     }
 }
