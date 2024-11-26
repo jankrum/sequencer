@@ -3,7 +3,7 @@ import Part from "../../../../playbacker/band/part/part"
 import { Beats, Bpm, Chord, computeBeatTiming, convertBpmToMpb, convertSpecificPitchToMidiNumber, Dynamics, SwingAmount, tastefullyShortenDuration } from "./helper"
 
 export default function* jazzBassist(bass: Part, tempo: Bpm, beatsPerBar: Beats, swingAmount: SwingAmount, swingDivision: Beats, chords: Chord[], velocity: Dynamics): Generator<Event> {
-    const directionControl = bass.controller.getOptionControl('DIR ', [`\\/`, '/\\'])
+    const directionControl = bass.controller.getOptionControl('DIR: ', [`\\/`, '/\\'])
 
     const mpb: Milliseconds = convertBpmToMpb(tempo)
     const tastefulQuarterNote = tastefullyShortenDuration(1)

@@ -1,5 +1,5 @@
-import { /*DuplexMidiConfig,*/ SimplexMidiConfig, TransporterConfig, TransporterType, PartConfig, PartName, ControllerConfig, SynthesizerConfig, SynthesizerType, ControllerType, PartsConfig, Config, } from '../types.ts'
 import midiAccess from '../midi-access.ts'
+import { Config, ControllerConfig, ControllerType, PartConfig, PartName, PartsConfig, /*DuplexMidiConfig,*/ SimplexMidiConfig, SynthesizerConfig, SynthesizerType, TransporterConfig, TransporterType, } from '../types.ts'
 
 function getMidiPortProblems(parentName: string, portName: string, direction: 'inputs' | 'outputs'): string[] {
     const problems: string[] = []

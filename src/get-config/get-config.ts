@@ -1,11 +1,10 @@
 import { Config } from '../types.ts'
 
-// import getConfigFromUrl from './from-url.ts'
+import getConfigFromUrl from './from-url.ts'
 import getConfigFromUser from './from-user.ts'
 
 export default async (): Promise<Config> => {
-    // Cheeky fucker
-    return /*getConfigFromUrl() ||*/ await getConfigFromUser()
+    return getConfigFromUrl() || await getConfigFromUser()
 }
 
 // import { Config, ControllerType, SynthesizerType, TransporterType } from '../types.ts'
@@ -59,10 +58,4 @@ export default async (): Promise<Config> => {
 //     transporter: {
 //         type: TransporterType.Dom,
 //     },
-// }
-
-// export default async (): Promise<Config> => {
-//     const problems = getProblems(dummyConfig)
-//     console.log('Problems:', problems)
-//     return dummyConfig
 // }

@@ -298,16 +298,16 @@ class ProblemDiv {
 
 class MiscellaneousDiv {
     refreshButton: HTMLButtonElement | null = null
-    // rememberCheckbox: HTMLInputElement | null = null
+    rememberCheckbox: HTMLInputElement | null = null
     problemDiv = new ProblemDiv()
 
     render() {
         const refreshButton = this.refreshButton = dm('button', { type: 'button' }, 'Refresh MIDI Ports') as HTMLButtonElement
-        // const rememberCheckbox = this.rememberCheckbox = dm('input', { type: 'checkbox', id: SELECTORS.REMEMBER_CHECKBOX_ID }) as HTMLInputElement
-        // const rememberLabel = dm('label', { for: SELECTORS.REMEMBER_CHECKBOX_ID }, 'Remember')
+        const rememberCheckbox = this.rememberCheckbox = dm('input', { type: 'checkbox', id: SELECTORS.REMEMBER_CHECKBOX_ID }) as HTMLInputElement
+        const rememberLabel = dm('label', { for: SELECTORS.REMEMBER_CHECKBOX_ID }, 'Remember')
         const submitButton = dm('button', { type: 'submit' }, 'Submit')
         const problemDiv = this.problemDiv.render()
-        const div = dm('div', {}, refreshButton, /*rememberCheckbox, rememberLabel,*/ submitButton, problemDiv)
+        const div = dm('div', {}, refreshButton, rememberCheckbox, rememberLabel, submitButton, problemDiv)
 
         return div
     }
@@ -469,10 +469,19 @@ class ConfigFormElement {
                     return
                 }
 
-                // // If the user wants to remember the config, save it to session storage
-                // if (this.miscellaneousDiv.rememberCheckbox.checked) {
-                //     sessionStorage.setItem(SESSION_STORAGE_STRING, JSON.stringify(config))
-                // }
+                // If the user wants to remember the config, save it to the url
+                if (this.miscellaneousDiv.rememberCheckbox?.checked) {
+                    try {
+                        const jsonString = JSON.stringify(config)
+                        const base64String = btoa(jsonString)
+                        const encodedString = encodeURIComponent(base64String)
+                        const url = `${window.location.origin}${window.location.pathname}?config=${encodedString}`
+                        window.history.pushState({}, '', url)
+                    } catch (error) {
+                        alert('Error saving config to URL')
+                        console.error(error)
+                    }
+                }
 
                 // Remove the form from the DOM
                 this.form.remove()

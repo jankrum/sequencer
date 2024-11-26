@@ -17,8 +17,7 @@ export type SimplexMidiConfig = {
 //#region Transporter Config
 export enum TransporterType {
     Dom,
-    Midi,
-    // Webrtc,
+    // Midi,
 }
 
 export type DomTransporterConfig = {
@@ -30,19 +29,13 @@ export type DomTransporterConfig = {
 //     midi: DuplexMidiConfig
 // }
 
-// export type WebrtcTransporterConfig = {
-//     type: TransporterType.Webrtc
-//     room: string
-// }
-
-export type TransporterConfig = DomTransporterConfig // | MidiTransporterConfig | WebrtcTransporterConfig
+export type TransporterConfig = DomTransporterConfig // | MidiTransporterConfig
 //#endregion
 
 //#region Controller Config
 export enum ControllerType {
     Dom,
-    Midi,
-    // Webrtc,
+    // Midi,
 }
 
 export type DomControllerConfig = {
@@ -54,19 +47,13 @@ export type DomControllerConfig = {
 //     midi: DuplexMidiConfig
 // }
 
-// export type WebrtcControllerConfig = {
-//     type: ControllerType.Webrtc
-//     room: string
-// }
-
-export type ControllerConfig = DomControllerConfig // | MidiControllerConfig | WebrtcControllerConfig
+export type ControllerConfig = DomControllerConfig // | MidiControllerConfig
 //#endregion
 
 //#region Synthesizer Config
 export enum SynthesizerType {
     Dom,
     Midi,
-    // Tone,
 }
 
 export type DomSynthesizerConfig = {
@@ -78,33 +65,7 @@ export type MidiSynthesizerConfig = {
     midi: SimplexMidiConfig
 }
 
-// export enum ToneSourceType {
-//     Chiptune,
-//     Sampler,
-//     Synth,
-// }
-
-// export type ChiptuneToneSourceConfig = {
-//     type: ToneSourceType.Chiptune
-// }
-
-// export type SamplerToneSourceConfig = {
-//     type: ToneSourceType.Sampler
-//     sampleName: string
-// }
-
-// export type SynthToneSourceConfig = {
-//     type: ToneSourceType.Synth
-// }
-
-// export type ToneSourceConfig = ChiptuneToneSourceConfig | SamplerToneSourceConfig | SynthToneSourceConfig
-
-// export type ToneSynthesizerConfig = {
-//     type: SynthesizerType.Tone
-//     source: ToneSourceConfig
-// }
-
-export type SynthesizerConfig = DomSynthesizerConfig | MidiSynthesizerConfig // | ToneSynthesizerConfig
+export type SynthesizerConfig = DomSynthesizerConfig | MidiSynthesizerConfig
 //#endregion
 
 //#region Config
