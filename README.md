@@ -1,3 +1,3 @@
-# sequencer-vite
+# sequencer
 
-A test of the sequencer using Vite & Typescript
+The sequencer
